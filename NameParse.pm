@@ -20,15 +20,10 @@ Lingua::EN::NameParse - routines for manipulating a persons name
 
    $error = $name->parse("MR AC DE SILVA");
 
-   %my_name = $name->components;
-   $surname = $my_name{surname_1}; # DE SILVA
+   %name_comps = $name->components;
+   $surname = $name_comps{surname_1}; # DE SILVA
 
    $correct_casing = $name->case_all; # Mr AC de Silva
-
-   %name = $name->case_components;
-   
-	$lc_prefix = 0;
-   $correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
 
    $good_name = &clean("Bad Na9me   "); # "Bad Name"
 
@@ -38,6 +33,8 @@ Lingua::EN::NameParse - routines for manipulating a persons name
    $number_surnames = $my_properties{number}; # 1
    $bad_input = $my_properties{non_matching};
 
+	$lc_prefix = 0;
+   $correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
 
 =head1 REQUIRES
 
@@ -82,6 +79,7 @@ that can make up a name.
    Conjunction - word to separate names or initials, such as "And"
    Initials    - 1-3 letters, each with an optional space and/or dot
    Surname     - De Silva, Van Der Heiden, MacNay-Smith, O'Reilly ...
+   Suffix      - Senior, Jnr, III, V ...
 
 Refer to the component grammar defined within the code  for a complete
 list of combinations. 
@@ -106,7 +104,11 @@ of the name is used. The following formats are currently supported :
 
 
 Precursors are only applied to the 'Mr_John_A_Smith','Mr_John_Smith', 
-'Mr_A_Smith', 'Mr_John_Smith', 'John_Smith' and 'A_Smith' formats
+'Mr_A_Smith', 'Mr_John_Smith', 'John_Smith' and 'A_Smith' formats.
+
+Suffixes are only applied to the 'Mr_John_A_Smith','Mr_John_Smith', 
+'Mr_A_Smith', 'Mr_John_A_Smith' and 'John_Smith' formats
+
 
 =head1 METHODS
 
@@ -134,13 +136,13 @@ optional argument to the C<new> method.
    my $name = new Lingua::EN::NameParse(%args); 
 
    
-=head3 salutation
+=item salutation
 
 The option defines the salutation word, such as "Dear" or "Greetings". It
 must be defined if you are planning to use the C<salutation> method.
 
 
-=head3 sal_default 
+=item sal_default 
 
 This option defines the  defaulting word to substitute for the title and
 surname(s), when parsing fails to identify them. It is also used when a
@@ -150,7 +152,7 @@ in the unmatched section then it is assumed that we are dealing with more than
 one person, and an 's' is appended to the defaulting word.
 
 
-=head3 force_case
+=item force_case
 
 This option will force the C<case_all> method to name case the entire input
 string, including any unmatched sections that failed parsing. For example, in 
@@ -160,7 +162,7 @@ the best option, although any initials in the unmatched section will not
 be correctly cased. This option is useful when you know you data has invalid 
 names, but you cannot filter out or reject them.
 
-=head3 auto_clean
+=item auto_clean
 
 When this option is set to a positive value, any call to the C<parse> method 
 that fails will attempt to 'clean' the name and then reparse it. See the 
@@ -168,14 +170,14 @@ C<clean> method for  details. This is useful for dirty data with embedded
 unprintable or non alphabetic characters. 
   
   
-=head3 lc_prefix
+=item lc_prefix
 
 When this option is set to a positive value, it will force the C<case_all> 
 and C<case_component> methods to lower case the first letter of each word that
 occurs in the prefix portion of a surname. For example, Mr AB de Silva,
 or Ms AS von der Heiden.
 
-=head3 initials
+=item initials
 
 Allows the user to control the number of letters that can occur in the initials.
 Valid settings are 1,2 or 3. If no value is supplied a default of 2 is used.  
@@ -301,7 +303,7 @@ The input is a text string and the output is the string with:
 The C<properties> method returns all the properties of the name,
 non_matching, number and type, as a hash.
 
-=head3 type
+=item type
 
 The type of format a name is in, as one of the following strings: 
 
@@ -319,7 +321,7 @@ The type of format a name is in, as one of the following strings:
    unknown
  
    
-=head3 non_matching
+=item non_matching
 
 Returns any unmatched section that was found.
    
@@ -371,8 +373,6 @@ Data Dictionary for transfer of street addressing information"
    Add filtering of very long names
    Add diagnostic messages explaining why parsing failed
    Add transforming methods to do things like remove dots from initials
-   Account for suffixes like Senior, Jnr, IV, "The Third'
-   Add awards like OBE, PhD, BSc ...
    Try to derive gender (Mr... is male, Ms, Mrs... is female)
 
 Let the user select what level of complexity of grammar they need for
@@ -406,11 +406,10 @@ Add regression tests for all combinations of each component
 
 =head1 COPYRIGHT
 
-Copyright (c) 1999 Kim Ryan. All rights reserved.
+Copyright (c) 1999-2000 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it 
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).
-
 
 
 =head1 AUTHOR
@@ -422,7 +421,7 @@ Thanks to all the people who provided ideas and suggestions, including -
    Damian Conway <damian@cs.monash.edu.au> author of Parse::RecDescent
    <mark.summerfield@chest.ac.uk>, author of Lingua::EN::NameCase, 
    Ron Savage <rpsavage@ozemail.com.au>
-   <alastair@calliope.demon.co.uk>
+   <alastair@calliope.demon.co.uk>, Adam Huffman, Douglas Wilson
 
 =cut
 
@@ -436,7 +435,7 @@ use strict;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.02';
+$VERSION   = '1.03';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -554,7 +553,7 @@ full_name :
    }
    |
 
-   precursor(?) title given_name middle_initial surname non_matching(?)
+   precursor(?) title given_name middle_initial surname suffix(?) non_matching(?)
    {
       $return =
       {
@@ -563,14 +562,15 @@ full_name :
          given_name_1  => $item[3],
          initials_1    => $item[4],
          surname_1     => $item[5],
-         non_matching  => $item[6][0],
+         suffix        => $item[6][0],
+         non_matching  => $item[7][0],
          number        => 1,
          type          => 'Mr_John_A_Smith'
       }
    }
    |
    
-   precursor(?) title given_name surname non_matching(?)
+   precursor(?) title given_name surname suffix(?) non_matching(?)
    {
       $return =
       {
@@ -578,14 +578,15 @@ full_name :
          title_1       => $item[2],
          given_name_1  => $item[3],
          surname_1     => $item[4],
-         non_matching  => $item[5][0],
+         suffix        => $item[5][0],
+         non_matching  => $item[6][0],
          number        => 1,
          type          => 'Mr_John_Smith'
       }
    }
    |
      
-   precursor(?) title initials surname non_matching(?)
+   precursor(?) title initials surname suffix(?) non_matching(?)
    {
       $return =
       {
@@ -593,14 +594,15 @@ full_name :
          title_1       => $item[2],
          initials_1    => $item[3],
          surname_1     => $item[4],
-         non_matching  => $item[5][0],
+         suffix        => $item[5][0],
+         non_matching  => $item[6][0],
          number        => 1,
          type          => 'Mr_A_Smith'  
       }
    }
    |
    
-   precursor(?) given_name middle_initial surname non_matching(?)
+   precursor(?) given_name middle_initial surname suffix(?) non_matching(?)
    {
       $return =
       {
@@ -608,14 +610,15 @@ full_name :
          given_name_1  => $item[2],
          initials_1    => $item[3],
          surname_1     => $item[4],
-         non_matching  => $item[5][0],
+         suffix        => $item[5][0],
+         non_matching  => $item[6][0],
          number        => 1,
          type          => 'John_A_Smith'
       }
    }
    |
    
-   precursor(?) given_name surname non_matching(?)
+   precursor(?) given_name surname suffix(?) non_matching(?)
    {
       $return =
       {
@@ -623,6 +626,7 @@ full_name :
          given_name_1  => $item[2],
          surname_1     => $item[3],
          non_matching  => $item[4][0],
+         non_matching  => $item[5][0],
          number        => 1,
          type          => 'John_Smith'
       }
@@ -842,6 +846,27 @@ q{
    name: /[A-Z]{2,} ?/i      # space needed if any trailing suffix       
 };
 
+
+my $suffix = 
+q{
+	
+	suffix:
+
+	   /Sn?r\.? ?/i    |  
+	   /Senior ?/i     |
+	     
+	   /Jn?r\.? ?/i    |
+	   /Junior ?/i     |
+
+	   /VI{1,3} ?/     | # VI,VII,VIII
+	   /IV ?/          |
+	   /V ?/           |
+	   /I{1,3} ?/      | # I,II,III
+
+	   /Esq(\.|uire)? ?/i
+};
+
+
 my $non_matching = q{ non_matching: /.*/ };
 
 #------------------------------------------------------------------------------
@@ -852,16 +877,16 @@ my $non_matching = q{ non_matching: /.*/ };
 my %component_order=
 (
    'Mr_A_Smith_&_Ms_B_Jones' => ['title_1','initials_1','surname_1','conjunction_1','title_2','initials_2','surname_2'],
-   'Mr_&_Ms_A_&_B_Smith' => ['title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2','surname_1'],
-   'Mr_A_&_Ms_B_Smith'   => ['title_1','initials_1','conjunction_1','title_2','initials_2','surname_1'],
-   'Mr_&_Ms_A_Smith'     => ['title_1','conjunction_1','title_2','initials_1','surname_1'],
-   'Mr_A_&_B_Smith'      => ['title_1','initials_1','conjunction_1','initials_2','surname_1'],
-   'Mr_John_A_Smith'     => ['precursor','title_1','given_name_1','initials_1','surname_1'],
-   'Mr_John_Smith'       => ['precursor','title_1','given_name_1','surname_1'],
-   'Mr_A_Smith'          => ['precursor','title_1','initials_1','surname_1'],
-   'John_A_Smith'        => ['precursor','given_name_1','initials_1','surname_1'],
-   'John_Smith'          => ['precursor','given_name_1','surname_1'],
-   'A_Smith'             => ['precursor','initials_1','surname_1']
+   'Mr_&_Ms_A_&_B_Smith'     => ['title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2','surname_1'],
+   'Mr_A_&_Ms_B_Smith'       => ['title_1','initials_1','conjunction_1','title_2','initials_2','surname_1'],
+   'Mr_&_Ms_A_Smith'         => ['title_1','conjunction_1','title_2','initials_1','surname_1'],
+   'Mr_A_&_B_Smith'          => ['title_1','initials_1','conjunction_1','initials_2','surname_1'],
+   'Mr_John_A_Smith'         => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
+   'Mr_John_Smith'           => ['precursor','title_1','given_name_1','surname_1','suffix'],
+   'Mr_A_Smith'              => ['precursor','title_1','initials_1','surname_1','suffix'],
+   'John_A_Smith'            => ['precursor','given_name_1','initials_1','surname_1','suffix'],
+   'John_Smith'              => ['precursor','given_name_1','surname_1','suffix'],
+   'A_Smith'                 => ['precursor','initials_1','surname_1']
 );
 #------------------------------------------------------------------------------
 # Create a new instance of a name parsing object. This step is time consuming
@@ -919,6 +944,10 @@ sub new
    
    $grammar .= $full_surname . $non_matching;
    
+   $grammar .= $suffix;
+
+   $grammar .= $non_matching;
+
    $name->{parse} = new Parse::RecDescent($grammar);
    
    return ($name);
@@ -996,7 +1025,7 @@ sub case_components
       foreach $curr_key ( keys %orig_components )
       {
          my $cased_value;
-         if ( $curr_key =~ /initials/ )
+         if ( $curr_key =~ /initials/ ) # intials_1, possibly initials_2
          {
             $cased_value = uc($orig_components{$curr_key});
          }
@@ -1004,6 +1033,19 @@ sub case_components
          {
             $cased_value = &case_surname($orig_components{$curr_key},$name->{lc_prefix});
          }
+         elsif ( $curr_key eq 'suffix' )          
+         {
+            # Roman numerals for second, fifth etc
+         	if ( $orig_components{$curr_key} =~ /^[IV]/ )
+         	{
+	            $cased_value = uc($orig_components{$curr_key});
+         	}
+            else
+            {
+	            $cased_value = &_case_word($orig_components{$curr_key});
+            }
+         }
+         
          else
          {
             $cased_value = &_case_word($orig_components{$curr_key});
@@ -1054,26 +1096,27 @@ sub case_all
 #------------------------------------------------------------------------------
 # The user may specify their own preferred spelling for surnames. 
 # These should be placed in a text file called surname_prefs.txt
+# in the same location as the module itself.
 
 BEGIN 
 {
-   my $dir;
-   foreach $dir ( @INC )
+	# Obtain the full path to NameParse module, defined in the %INC hash.
+   my $prefs_file_location = $INC{"Lingua/EN/NameParse.pm"};
+   # Now substitute the name of the preferences file
+   $prefs_file_location =~ s/NameParse\.pm$/surname_prefs.txt/;
+
+   if ( open(PREFERENCES_FH,"<$prefs_file_location") )
    {
-      if ( open(PREFERENCES_FH,"<$dir/Lingua/EN/surname_prefs.txt") )
+      my @surnames = <PREFERENCES_FH>;
+      my $name;
+      foreach $name ( @surnames )
       {
-         my @surnames = <PREFERENCES_FH>;
-         my $name;
-         foreach $name ( @surnames )
-         {
-            chomp($name);
-            # Build hash, lower case name is key for case insensitive
-            # comparison, while value holds the actual capitalisation
-            $Lingua::EN::surname_preferences{lc($name)} = $name;
-         }
-         close(PREFERENCES_FH);
-         last;
+         chomp($name);
+         # Build hash, lower case name is key for case insensitive
+         # comparison, while value holds the actual capitalisation
+         $Lingua::EN::surname_preferences{lc($name)} = $name;
       }
+      close(PREFERENCES_FH);
    }
 }  
 #------------------------------------------------------------------------------
@@ -1139,7 +1182,7 @@ sub case_surname
    return($_);
 }
 #------------------------------------------------------------------------------
-# Create a personalised greeting from a person or 2 peoples names
+# Create a personalised greeting from one or two person's names
 
 sub salutation
 {
@@ -1153,8 +1196,9 @@ sub salutation
    my @salutation;
    push(@salutation,$name->{salutation});
 
+   # Personalisd salutations cannot be created for Estates or people 
+   # without some title, rever to default salutation
    if ( $name->{error} or
-   # Salutations cannot be created for Estates 
    ( $name->{components}{precursor} and $name->{components}{precursor} =~ /Estate/i)  or 
    not $name->{components}{title_1} )
    {
@@ -1175,11 +1219,10 @@ sub salutation
       # create salutation in the form: Dear <title(s)?> <surname(s)?>
       my %component_vals = $name->case_components;
       my @order = @{ $component_order{$name->{properties}{type} } };
-
       my (@cased_components,$component);
       foreach $component ( @order )
       {
-         unless ( $component =~ /initial|precursor/ or not $component_vals{$component} )
+         unless ( $component =~ /initial|precursor|suffix/ or not $component_vals{$component} )
          {
             push(@salutation,$component_vals{$component});
             # shared initial and surname (eg brothers), so duplicate title_1
@@ -1264,6 +1307,12 @@ sub _assemble
    {
       $name->{components}{surname_2} = &_trim_space($parsed_name->{surname_2});
    }
+   
+   if ( $parsed_name->{suffix} )
+   {
+      $name->{components}{suffix} = &_trim_space($parsed_name->{suffix});
+   }
+   
 
    $name->{properties} = ();
 
