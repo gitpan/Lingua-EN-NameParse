@@ -1,6 +1,6 @@
 =head1 NAME
 
-Lingua::EN::NameParse - routines for manipulating a persons name
+Lingua::EN::NameParse - routines for manipulating a person's name
 
 =head1 SYNOPSIS
 
@@ -102,15 +102,22 @@ of the name is used. The following formats are currently supported :
    Mr_A_Smith
    John_Adam_Smith
    John_A_Smith
+   J_Adam_Smith
    John_Smith
    A_Smith
 
 
-Precursors are only applied to the Mr_John_A_Smith, Mr_John_Smith,
-John_Adam_Smith, Mr_A_Smith, Mr_John_Smith, John_Smith and A_Smith formats.
+Precursors and suffixes are only applied to the following formats:
 
-Suffixes are only applied to the Mr_John_A_Smith,Mr_John_Smith,
-Mr_A_Smith, John_Adam_Smith, John_A_Smith and John_Smith formats.
+Mr_John_A_Smith
+Mr_John_Smith
+Mr_John_Smith
+Mr_A_Smith
+John_Adam_Smith
+John_A_Smith
+J_Adam_Smith
+John_Smith
+A_Smith
 
 
 =head1 METHODS
@@ -345,6 +352,7 @@ The type of format a name is in, as one of the following strings:
    Mr_A_Smith
    John_Adam_Smith
    John_A_Smith
+   J_Adam_Smith
    John_Smith
    A_Smith
    unknown
@@ -436,6 +444,9 @@ Add regression tests for all combinations of each component
 
 =head1 BUGS
 
+The dot in a suffix of Jnr. or Snr. will be consumed as unmatched text,
+and not be retained with the suffix.
+
 
 =head1 COPYRIGHT
 
@@ -470,7 +481,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.13';
+$VERSION   = '1.14';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -492,8 +503,9 @@ my %component_order=
    'Mr_A_Smith'              => ['precursor','title_1','initials_1','surname_1','suffix'],
    'John_Adam_Smith'         => ['precursor','title_1','given_name_1','middle_name','surname_1','suffix'],
    'John_A_Smith'            => ['precursor','given_name_1','initials_1','surname_1','suffix'],
+   'J_Adam_Smith'            => ['precursor','initials_1','given_name_1','surname_1','suffix'],
    'John_Smith'              => ['precursor','given_name_1','surname_1','suffix'],
-   'A_Smith'                 => ['precursor','initials_1','surname_1']
+   'A_Smith'                 => ['precursor','initials_1','surname_1','suffix']
 );
 #-------------------------------------------------------------------------------
 # Create a new instance of a name parsing object. This step is time consuming
@@ -552,83 +564,17 @@ sub parse
    $name->{properties} = ();
    $name->{input_string} = $input_string;
 
-   &_pre_parse($name);
-
    $name = &_assemble($name);
    &_validate($name);
 
    if ( $name->{error} and $name->{auto_clean} )
    {
       $name->{input_string} = &clean($name->{input_string});
-       &_pre_parse($name);
       $name = &_assemble($name);
       &_validate($name);
    }
 
    return($name,$name->{error});
-}
-#-------------------------------------------------------------------------------
-# Search for precursors or suffixes. As these components occur either at the
-# beginning or end of the string, detecting and removing them now will
-# simplfy the grammar tree and make parsing more reliable. For suffixes the
-# ambiguities between suffixes and surnames are avoided for the John_Adam_Smith
-# name type. Note that any non matching material after the suffix will be lost.
-
-sub _pre_parse
-{
-   my $name = shift;
-
-   if
-   (
-      $name->{input_string} =~ /^(Estate Of (The Late )?)(.*)/i or
-      $name->{input_string} =~ /^(His (Excellency|Honou?r))\s+(.*)/i or
-      $name->{input_string} =~ /^((The )?Right Honou?rable)\s+(.*)/i or
-      $name->{input_string} =~ /^((The )?Rt\.? Hon\.?)\s+(.*)/i
-   )
-   {
-      $name->{components}{precursor} = &_trim_space($1);
-      $name->{input_string} = $3;
-   }
-   else 
-   {
-		$name->{components}{precursor} = '';
-   }
-   	
-
-   # Search for a suffix at the end of the string.
-
-   if
-   (
-      $name->{input_string} =~ /^(.*)\s+(I{1,3})$/i or  # 1st, 2nd, 3rd
-      $name->{input_string} =~ /^(.*)\s+(IV)$/i or      # 4th
-      $name->{input_string} =~ /^(.*)\s+(V)$/i or       # 5th
-      $name->{input_string} =~ /^(.*)\s+(VI{1,3})$/i or # 6th, 7th, 8th
-      $name->{input_string} =~ /^(.*)\s+(IX)$/i or      # 9th
-      $name->{input_string} =~ /^(.*)\s+(X)$/i or       # 10th
-      $name->{input_string} =~ /^(.*)\s+(XI{1,3})$/i    # 11th, 12th, 13th
-   )
-   {
-      $name->{input_string} = $1;
-      $name->{components}{suffix} = $2;
-      # record that prefix is in roman numeral format to assist
-      # with casing in case_components method
-      $name->{properties}{roman_suffix} = 1;
-   }
-   elsif
-   (
-      $name->{input_string} =~ /^(.*)\s+(Sn?r\.?)$/i or
-      $name->{input_string} =~ /^(.*)\s+(Jn?r\.?)$/i or
-      $name->{input_string} =~ /^(.*)\s+(Esq(\.|uire)?)$/i
-   )
-   {
-      $name->{input_string} = $1;
-      $name->{components}{suffix} = $2;
-   }
-   else 
-   {
-	   $name->{components}{suffix} = '';
-   }
-   	
 }
 #-------------------------------------------------------------------------------
 # Clean the input string. Can be called as a stand alone function.
@@ -676,33 +622,21 @@ sub case_components
         my ($curr_key,%cased_components);
         foreach $curr_key ( keys %orig_components )
         {
-	        my $cased_value;
-	        if ( $curr_key =~ /initials/ ) # intials_1, possibly initials_2
-	        {
-	        	$cased_value = uc($orig_components{$curr_key});
-	        }
-	        elsif ( $curr_key =~ /surname/ )
-	        {
-	           $cased_value = &case_surname($orig_components{$curr_key},$name->{lc_prefix});
-	        }
-	        elsif ( $curr_key eq 'suffix' )
-	        {
-				# Roman numerals for 1st, 2nd, 3rd, 6th, 12th etc
-				if ( $name->{properties}{roman_suffix} )
-				{
-					$cased_value = uc($orig_components{$curr_key});
-				}
-				else   # Snr, Jnr. etc
-				{
-					$cased_value = &_case_word($orig_components{$curr_key});
-				}
-	        }
-	        else
-	        {
-	            $cased_value = &_case_word($orig_components{$curr_key});
-	        }
+            my $cased_value;
+            if ( $curr_key =~ /initials/ ) # intials_1, possibly initials_2
+            {
+                $cased_value = uc($orig_components{$curr_key});
+            }
+            elsif ( $curr_key =~ /surname|suffix/ )
+            {
+               $cased_value = &case_surname($orig_components{$curr_key},$name->{lc_prefix});
+            }
+            else
+            {
+                $cased_value = &_case_word($orig_components{$curr_key});
+            }
 
-	        $cased_components{$curr_key} = $cased_value;
+            $cased_components{$curr_key} = $cased_value;
         }
         return(%cased_components);
     }
@@ -836,6 +770,14 @@ sub case_surname
    # we need to account for this case.
    s/(\w+)'S(\s+)/$1's$2/;
 
+   # Correct for roman numerals, excluding single letter cases I,V and X,
+   # which will work with the above code
+   s/\b(I{2,3})\b/\U$1/i;  # 2nd, 3rd
+   s/\b(IV)\b/\U$1/i;      # 4th
+   s/\b(VI{1,3})\b/\U$1/i; # 6th, 7th, 8th
+   s/\b(IX)\b/\U$1/i;      # 9th
+   s/\b(XI{1,3})\b/\U$1/i; # 11th, 12th, 13th
+
    return($_);
 }
 #-------------------------------------------------------------------------------
@@ -929,6 +871,12 @@ sub _assemble
    # now be removed from the components, and will be restored by the
    # case_all and salutation methods, if called.
 
+   $name->{components}{precursor} = '';
+   if ( $parsed_name->{precursor} )
+   {
+      $name->{components}{precursor} = &_trim_space($parsed_name->{precursor});
+   }
+
    $name->{components}{title_1} = '';
    if ( $parsed_name->{title_1} )
    {
@@ -989,14 +937,20 @@ sub _assemble
       $name->{components}{surname_2} = &_trim_space($parsed_name->{surname_2});
    }
 
+   $name->{components}{suffix} = '';
+   if ( $parsed_name->{suffix} )
+   {
+      $name->{components}{suffix} = &_trim_space($parsed_name->{suffix});
+   }
+
 
    $name->{properties}{non_matching} = '';
    if ( $parsed_name->{non_matching} ) 
    {
-	  $name->{properties}{non_matching}  = $parsed_name->{non_matching};
+      $name->{properties}{non_matching}  = $parsed_name->{non_matching};
    }
 
-   $name->{properties}{number} = 0;   	
+   $name->{properties}{number} = 0;     
    $name->{properties}{number} = $parsed_name->{number};
    $name->{properties}{type}   = $parsed_name->{type};
 

@@ -1,6 +1,12 @@
-
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.14 19 Jul 2001:
+    Moved prefixes and suffixes back into grammar tree to stop invalid combinations
+    Removed pre parse stage
+	Changed case_surname to correctly capitalise suffixes in roman numeral foramt
+    Removed POD directives from README
+	Added J_Adam_Smith name type, thanks to Michael Cesar
+	
 
 1.13 25 Apr 2001:
 

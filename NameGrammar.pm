@@ -141,98 +141,128 @@ full_name :
    }
    |
 
-   title(?) given_name given_name surname non_matching(?)
+   precursor(?) title given_name single_initial surname suffix(?) non_matching(?)
    {
       $return =
       {
-         title_1       => $item[1][0],
-         given_name_1  => $item[2],
-         middle_name   => $item[3],
-         surname_1     => $item[4],
-         non_matching  => $item[5][0],
-         number        => 1,
-         type          => 'John_Adam_Smith'
-      }
-   }
-   |
-
-   title given_name middle_initial surname non_matching(?)
-   {
-      $return =
-      {
-         title_1       => $item[1],
-         given_name_1  => $item[2],
-         initials_1    => $item[3],
-         surname_1     => $item[4],
-         non_matching  => $item[5][0],
+         precursor     => $item[1][0],
+         title_1       => $item[2],
+         given_name_1  => $item[3],
+         initials_1    => $item[4],
+         surname_1     => $item[5],
+         suffix        => $item[6][0],
+         non_matching  => $item[7][0],
          number        => 1,
          type          => 'Mr_John_A_Smith'
       }
    }
    |
 
-   title given_name surname non_matching(?)
+   precursor(?) title given_name surname suffix(?) non_matching(?)
    {
       $return =
       {
-         title_1       => $item[1],
-         given_name_1  => $item[2],
-         surname_1     => $item[3],
-         non_matching  => $item[4][0],
+         precursor     => $item[1][0],
+         title_1       => $item[2],
+         given_name_1  => $item[3],
+         surname_1     => $item[4],
+         suffix        => $item[5][0],
+         non_matching  => $item[6][0],
          number        => 1,
          type          => 'Mr_John_Smith'
       }
    }
    |
 
-   title initials surname non_matching(?)
+   precursor(?) title initials surname suffix(?) non_matching(?)
    {
       $return =
       {
-         title_1       => $item[1],
-         initials_1    => $item[2],
-         surname_1     => $item[3],
-         non_matching  => $item[4][0],
+         precursor     => $item[1][0],
+         title_1       => $item[2],
+         initials_1    => $item[3],
+         surname_1     => $item[4],
+         suffix        => $item[5][0],
+         non_matching  => $item[6][0],
          number        => 1,
          type          => 'Mr_A_Smith'
       }
    }
    |
 
-   given_name middle_initial surname non_matching(?)
+   precursor(?) title(?) given_name given_name surname suffix(?) non_matching(?)
    {
       $return =
       {
-         given_name_1  => $item[1],
-         initials_1    => $item[2],
-         surname_1     => $item[3],
-         non_matching  => $item[4][0],
+         precursor     => $item[1][0],
+         title_1       => $item[2][0],
+         given_name_1  => $item[3],
+         middle_name   => $item[4],
+         surname_1     => $item[5],
+         suffix        => $item[6][0],
+         non_matching  => $item[7][0],
+         number        => 1,
+         type          => 'John_Adam_Smith'
+      }
+   }
+   |
+
+   precursor(?) given_name single_initial surname suffix(?) non_matching(?)
+   {
+      $return =
+      {
+         precursor     => $item[1][0],
+         given_name_1  => $item[2],
+         initials_1    => $item[3],
+         surname_1     => $item[4],
+         suffix        => $item[5][0],
+         non_matching  => $item[6][0],
          number        => 1,
          type          => 'John_A_Smith'
       }
    }
    |
-
-   given_name surname non_matching(?)
+   
+   precursor(?) single_initial given_name surname suffix(?) non_matching(?)
    {
       $return =
       {
-         given_name_1  => $item[1],
-         surname_1     => $item[2],
-         non_matching  => $item[3][0],
+         precursor     => $item[1][0],
+         initials_1    => $item[2],
+         given_name_1  => $item[3],
+         surname_1     => $item[4],
+         suffix        => $item[5][0],
+         non_matching  => $item[6][0],
+         number        => 1,
+         type          => 'J_Adam_Smith'
+      }
+   }
+   |   
+
+   precursor(?) given_name surname suffix(?) non_matching(?)
+   {
+      $return =
+      {
+         precursor     => $item[1][0],
+         given_name_1  => $item[2],
+         surname_1     => $item[3],
+         suffix        => $item[4][0],
+         non_matching  => $item[5][0],
          number        => 1,
          type          => 'John_Smith'
       }
    }
    |
 
-   initials surname non_matching(?)
+   precursor(?) initials surname suffix(?) non_matching(?)
    {
       $return =
       {
-         initials_1    => $item[1],
-         surname_1     => $item[2],
-         non_matching  => $item[3][0],
+         precursor     => $item[1][0],
+         initials_1    => $item[2],
+         surname_1     => $item[3],
+         suffix        => $item[4][0],
+         non_matching  => $item[5][0],
          number        => 1,
          type          => 'A_Smith',
       }
@@ -253,6 +283,23 @@ full_name :
 #------------------------------------------------------------------------------
 # Individual components that a name can be composed from. Components are
 # expressed as literals or Perl regular expressions.
+
+$precursor =
+q
+{
+    precursor : 
+
+    /Estate Of (The Late )?/i |
+    /His (Excellency|Honou?r) /i |
+    /Her (Excellency|Honou?r) /i |
+    /The Right Honou?rable /i |
+    /The Honou?rable /i |
+    /Right Honou?rable /i |
+    /The Rt\.? Hon\.? /i |
+    /The Hon\.? /i |
+    /Rt\.? Hon\.? /i
+
+};
 
 $title =
 q{
@@ -347,11 +394,11 @@ q{
 
 $conjunction = q{ conjunction : /And |& /i };
 
-# Used in the John_A_Smith name type. Although this duplicates
-# $initials_1, it is needed because the middle initial must always be
-# one character long, regardless of the length of initials set by the
-# user in the 'new' method.
-$middle_initial = q{ middle_initial: /[A-Z]\.? /i };
+# Used in the John_A_Smith and J_Adam_Smith name types. Although this 
+# duplicates $initials_1, it is needed because this type of initial must 
+# always be one character long, regardless of the length of initials set 
+# by the user in the 'new' method.
+$single_initial = q{ single_initial: /[A-Z]\.? /i };
 
 # Define given name combinations, specifying the minimum number of letters.
 # The correct pair of rules is determined by the 'initials' key in the hash
@@ -360,21 +407,21 @@ $middle_initial = q{ middle_initial: /[A-Z]\.? /i };
 # John, Jo-Anne, D'Artagnan, O'Shaugnessy La'Keishia
 $given_name_min_2 =
 q{
-	given_name: /[A-Z]{2,}(\-[A-Z]{2,})? /i | /[A-Z]{1,}\'[A-Z]{2,} /i
+    given_name: /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
 };
 
 $given_name_min_3 =
 q{
-	given_name: /[A-Z]{3,}(\-[A-Z]{2,})? /i | /[A-Z]{1,}\'[A-Z]{2,} /i
+    given_name: /[A-Z]{3,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
 };
 
 $given_name_min_4 =
 q{
-	given_name: /[A-Z]{4,}(\-[A-Z]{2,})? /i | /[A-Z]{1,}\'[A-Z]{3,} /i
+    given_name: /[A-Z]{4,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{3,} /i
 };
 
 # Define initials combinations specifying the minimum and maximum letters.
-# Order from most complex to simplest,	to avoid premature matching.
+# Order from most complex to simplest,  to avoid premature matching.
 
 # 'A' 'A.'
 $initials_1 = q{ initials: /[A-Z]\.? /i };
@@ -395,15 +442,17 @@ q{
 $full_surname =
 
 q{
-   surname : sub_surname second_name(?)
+   # Use look-ahead to avoid ambiguity between surname and suffix. For example,
+   # John Smith Snr, would detect Snr as the surname and Smith as the middle name
+   surname : ...!suffix sub_surname second_name(?)
    {
-      if ( $item[1] and $item[2][0] )
+      if ( $item[2] and $item[3][0] )
       {
-         $return = "$item[1]$item[2][0]"
+         $return = "$item[2]$item[3][0]"
       }
       else
       {
-         $return = "$item[1]"
+         $return = "$item[2]"
       }
    }
 
@@ -449,11 +498,37 @@ q{
       /Von (Der )?/i     |
       /Van (De(n|r)? )?/i
 
-	# Space needed for any following text
+   # space needed for any following text
    name: /[A-Z]{2,} ?/i
+
 };
 
-$non_matching = q{ non_matching: /.*/ };
+$suffix =
+q{
+   suffix:
+
+	  # word boundaries are used to stop partial matches from surnames such as 
+	  # the "VI" in "VINCE"
+
+      /Esq(\.|uire)?\b ?/i |
+      /Sn?r\.?\b ?/i | # Senior
+      /Jn?r\.?\b ?/i | # Junior
+
+      /XI{1,3}\b ?/i | # 11th, 12th, 13th
+      /X\b ?/i       | # 10th
+      /IV\b ?/i      | # 4th
+      /VI{1,3}\b ?/i | # 6th, 7th, 8th
+      /V\b ?/i       | # 5th
+      /IX\b ?/i      | # 9th
+      /I{1,3}\b ?/i    # 1st, 2nd, 3rd
+};
+
+# Two or more charaters. This is set to 2 as a work around for the problem
+# with detecting suffixes like Snr. and Jnr. The dot here gets picked up
+# as non matching.
+
+$non_matching = q{ non_matching: /.{2,}/ };
+
 
 #-------------------------------------------------------------------------------
 # Assemble correct combination for grammar tree.
@@ -462,9 +537,9 @@ sub create
 {
    my $name = shift;
 
-   my $grammar = $rules . $title . $conjunction;
+   my $grammar = $rules . $precursor . $title . $conjunction;
 
-   $grammar .= $middle_initial;
+   $grammar .= $single_initial;
 
    $name->{initials} > 3 and $name->{initials} = 3;
    $name->{initials} < 1 and $name->{initials} = 1;
@@ -491,6 +566,8 @@ sub create
    }
 
    $grammar .= $full_surname;
+
+   $grammar .= $suffix;
 
    $grammar .= $non_matching;
 

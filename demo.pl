@@ -72,19 +72,19 @@ LIEUTENANT COLONEL DE DE SILVA
 MR AB AND M/S CD VAN DER HEIDEN-MACNAY
  MR AS & D.E. DE LA MARE
 ESTATE OF THE LATE AB LE FONTAIN
-mr. eugene anderson i
-mr. eugene anderson ii
-mr. eugene anderson iii
-mr. eugene anderson iv
-mr. eugene anderson v
-mr. eugene anderson vi
-mr. eugene anderson vii
-mr. eugene anderson viii
-mr. eugene anderson ix
-mr. eugene anderson x
-mr. eugene anderson xi
-mr. eugene anderson xii
-mr. eugene anderson xiii
+MR. EUGENE ANDERSON I
+MR. EUGENE ANDERSON II
+MR. EUGENE ANDERSON III
+MR. EUGENE ANDERSON IV
+MR. EUGENE ANDERSON V
+MR. EUGENE ANDERSON VI
+MR. EUGENE ANDERSON VII
+MR. EUGENE ANDERSON VIII
+MR. EUGENE ANDERSON IX
+MR. EUGENE ANDERSON X
+MR. EUGENE ANDERSON XI
+MR. EUGENE ANDERSON XII
+MR. EUGENE ANDERSON XIII
 MR KA MACQUARIE JNR.
 REVERAND S.A. VON DER MERVIN SNR
 BIG BROTHER & THE HOLDING COMPANY

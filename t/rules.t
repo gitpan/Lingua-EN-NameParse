@@ -10,7 +10,7 @@ use Lingua::EN::NameParse;
 
 # We start with some black magic to print on failure.
 
-BEGIN { print "1..12\n"; }
+BEGIN { print "1..13\n"; }
 
 my $name = new Lingua::EN::NameParse;
 my ($input,%props);
@@ -62,19 +62,25 @@ $name->parse($input);
 %props = $name->properties;
 print $props{type} eq 'John_Adam_Smith' ? "ok 9\n" : "not ok 9\n";
 
+$input = "F SCOTT FITZGERALD";
+$name->parse($input);
+%props = $name->properties;
+print $props{type} eq 'J_Adam_Smith' ? "ok 10\n" : "not ok 10\n";
+
+
 $input = "JOHN F KENNEDY";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'John_A_Smith' ? "ok 10\n" : "not ok 10\n";
+print $props{type} eq 'John_A_Smith' ? "ok 11\n" : "not ok 11\n";
 
 $input = "TOM JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'John_Smith' ? "ok 11\n" : "not ok 11\n";
+print $props{type} eq 'John_Smith' ? "ok 12\n" : "not ok 12\n";
 
 $input = "AB JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'A_Smith' ? "ok 12\n" : "not ok 12\n";
+print $props{type} eq 'A_Smith' ? "ok 13\n" : "not ok 13\n";
 
 
