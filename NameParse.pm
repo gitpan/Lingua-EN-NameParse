@@ -21,20 +21,21 @@ Lingua::EN::NameParse - routines for manipulating a persons name
    $error = $name->parse("MR AC DE SILVA");
 
    %my_name = $name->components;
-   $surname = $my_name{surname_1};
+   $surname = $my_name{surname_1}; # DE SILVA
 
-   $correct_casing = $name->case_all;
+   $correct_casing = $name->case_all; # Mr AC de Silva
 
    %name = $name->case_components;
+   
+	$lc_prefix = 0;
+   $correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
 
-   $correct_casing = &case_surname("DE SILVA-MACNAY" [,$lc_prefix]);
+   $good_name = &clean("Bad Na9me   "); # "Bad Name"
 
-   $good_name = &clean("Bad Na9me");
-
-   $name->salutation;
+   $name->salutation; # Dear Mr de Silva
 
    %my_properties = $name->properties;
-   $number_surnames = $my_properties{number};
+   $number_surnames = $my_properties{number}; # 1
    $bad_input = $my_properties{non_matching};
 
 
@@ -402,35 +403,6 @@ Add regression tests for all combinations of each component
 =head1 BUGS
 
 
-=head1 CHANGES
-
-0.01 25 Apr 1999: First Release
-
-0.02 01 May 1999: Added test script, converted source to Unix format
-
-0.03 02 May 1999: Altered output of test script to work with Test::Harness
-                  Modified &clean to remove single leading or trailing space
-
-0.04 16 May 1999: Added test script for rule ordering
-                  Added more titles, improved documentation
-                  
-0.10 04 Jul 1999: Allowed for lower casing of surname prefixes
-                  
-0.30 21 Aug 1999: Allowed for user defined length of initials
-                  Added the Mr_John_Smith name type
-                  Added the John_Smith name type
-                  Surnames with the D' prefix now correctly capitalised
-                  
-                  If a parsed name had no components, the components method
-                  returned an odd numbered hash and case_componets returned 1.
-                  Both these methods now return undef in this situation.
-                  
-0.40 14 Sep 1999: Added the Mr_John_A_Smith and John_A_Smith name types
-                  Allowed for hyphenated given names 
-                  
-1.00 27 Dec 1999: Added user defined file of surname capitalisation over rides
-                  Allowed for salutations where precursor is not an estate
-                  
 
 =head1 COPYRIGHT
 
@@ -464,7 +436,7 @@ use strict;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.00';
+$VERSION   = '1.01';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -792,17 +764,23 @@ my $given_name_min_3 = q{ given_name: /[A-Z]{3,}(\-[A-Z]{2,})? /i };
  
 my $given_name_min_4 = q{ given_name: /[A-Z]{4,}(\-[A-Z]{2,})? /i };
 
+# Define initials combinations, order from most complex to simplest,
+# to avoid prmeature matching
 
-my $initials_1 = q{ initials: /[A-Z]\.? /i };
+# 'A' 'A.'
+my $initials_1 = q{ initials: /[A-Z]\.? /i }; 
 
-my $initials_2 = 
+# 'A. B.' 'A.B.' 'AB' 'A B'
+my $initials_2 =  
 q{ 
-   initials: /([A-Z] ){1,2}/i | /([A-Z]){1,2} /i | /([A-Z]\.){1,2} /i
+   initials:  /([A-Z]\. ){1,2}/i | /([A-Z]\.){1,2} /i | /([A-Z] ){1,2}/i | /([A-Z]){1,2} /i
 };
+
+# 'A. B. C. '  'A.B.C' 'ABC' 'A B C'  
 my $initials_3 = 
 q{ 
-   initials: /([A-Z] ){1,3}/i | /([A-Z]){1,3} /i | /([A-Z]\.){1,3} /i
-};
+   initials: /([A-Z]\. ){1,3}/i |  /([A-Z]\.){1,3} /i | /([A-Z] ){1,3}/i | /([A-Z]){1,3} /i
+};							 
 
 my $full_surname = 
 
@@ -972,15 +950,16 @@ sub clean
 {
    my ($input_string) = @_;
 
-   # remove illegal characters
-   $input_string =~ s/[^a-z\-\'\.,&\/ ]//ig;
-   
+   # remove illegal characters , why is comma here ????
+   $input_string =~ s/[^A-Za-z\-\'\.&\/ ]//go;
+
    # remove repeating spaces
-   $input_string =~ s/( ) +/$1/ig; 
+   $input_string =~ s/  +/ /go ;
+    
 
    # remove any remaining leading or trailing space
-   $input_string =~ s/^ //i; 
-   $input_string =~ s/ $//i;
+   $input_string =~ s/^ //; 
+   $input_string =~ s/ $//;
    
    return($input_string);
 }
@@ -1107,7 +1086,7 @@ sub case_surname
    my ($surname,$lc_prefix) = @_;
 
    # If the user has specified a preferred capitalisation for this
-   # surname it should be returned now.   
+   # surname in the surname_prefs.txt, it should be returned now.   
    if ($Lingua::EN::surname_preferences{lc($surname)} )
    {
       return($Lingua::EN::surname_preferences{lc($surname)});
@@ -1128,8 +1107,7 @@ sub case_surname
    {
       s/\b(Mac)([a-z]+)/$1\u$2/ig;
 
-      # Now correct for "Mac" exceptions. Note that these can be 
-      # overridden from the surname_prefs.txt file
+      # Now correct for "Mac" exceptions
       s/MacHin/Machin/;
       s/MacHlin/Machlin/;
       s/MacHar/Machar/;

@@ -1,0 +1,42 @@
+
+Revision history for Perl CPAN module Lingua::En::NameParse
+
+
+1.01 15 Apr 2000: auto_clean option now removes commas from input
+                  Improved regular expressions in 'clean' sub, 
+                    thanks to Mark Summerfield
+                  Catered for initials with dots and spaces, such as A. B. Smith, 
+                    thanks to Adam Huffman
+
+1.00 27 Dec 1999: Added user defined file of surname capitalisation over rides
+                  Allowed for salutations where precursor is not an estate
+
+0.40 14 Sep 1999: Added the Mr_John_A_Smith and John_A_Smith name types
+                  Allowed for hyphenated given names 
+
+0.30 21 Aug 1999: Allowed for user defined length of initials
+                  Added the Mr_John_Smith name type
+                  Added the John_Smith name type
+                  Surnames with the D' prefix now correctly capitalised
+                  
+                  If a parsed name had no components, the components method
+                  returned an odd numbered hash and case_componets returned 1.
+                  Both these methods now return undef in this situation                 
+
+0.10 04 Jul 1999: Allowed for lower casing of surname prefixes
+
+0.04 16 May 1999: Added test script for rule ordering
+                  Added more titles, improved documentation
+0.03 02 May 1999: Altered output of test script to work with Test::Harness
+                  Modified &clean to remvove single leading or trailing space
+0.02 01 May 1999: Added test script, converted source to Unix format
+
+0.01 25 Apr 1999: First Release
+
+
+
+                  
+                  
+                  
+
+

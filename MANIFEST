@@ -1,5 +1,6 @@
 MANIFEST
 README
+Changes
 Makefile.PL
 demo.pl
 NameParse.pm
