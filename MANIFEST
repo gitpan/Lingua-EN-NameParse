@@ -1,0 +1,7 @@
+MANIFEST
+README
+Makefile.PL
+demo.pl
+NameParse.pm
+t/main.t
+t/rules.t
