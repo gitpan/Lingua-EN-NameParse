@@ -1,8 +1,8 @@
 #------------------------------------------------------------------------------
 # File  : rules.t - test script for Lingua::EN::NameParse.pm
 #
-# Author: Kim Ryan (kimaryan@ozemail.com.au)
-# Date  : 1 May 1999
+# Author      : Kim Ryan (kimryan@cpan.org)
+# Last update : 23 Mar 2002
 #------------------------------------------------------------------------------
 
 use strict;
@@ -12,7 +12,12 @@ use Lingua::EN::NameParse;
 
 BEGIN { print "1..13\n"; }
 
-my $name = new Lingua::EN::NameParse;
+my %args =
+(
+	joint_names => 1
+);
+
+my $name = new Lingua::EN::NameParse(%args);
 my ($input,%props);
 
 # Test order of rule evaluation

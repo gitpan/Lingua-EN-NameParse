@@ -25,7 +25,7 @@ and/or modify it under the terms of the Perl Artistic License
 
 =head1 AUTHOR
 
-NameGrammar was written by Kim Ryan <kimaryan@ozemail.com.au>.
+NameGrammar was written by Kim Ryan <kimryan@cpan.org>.
 <http://www.data-distillers.com>
 
 
@@ -324,21 +324,31 @@ q{
    /Dame /i            |
 
    /Rever[e|a]nd /i    |
+   /Father /i          |
 
-   /Lord /i            |
-   /Lady /i            
+   /Captain /i         |
+   /Capt\.? /i         |
+   /Colonel /i         |
+   /Col\.? /i          |
+   /Gen(\.|eral)? /i   |
+   /Gen\. /i           |
+   /Major /i           |
+   /Maj\.? /i
+
+
 
 };
    
 $extended_titles =
 q{
-  
-					   |
+                       |
    /Messrs /i          |   # plural or Mr
    /Mme\.? /i          |   # Madame
    /Mister /i          |
    /Mast(\.|er)? /i    |
    /Ms?gr\.? /i        |   # Monsignor
+   /Lord /i            |
+   /Lady /i            |
 
    /Madam(e)? /i       |
 
@@ -356,53 +366,47 @@ q{
    /Insp\.? /i         |
 
    # Military
-   /Brig(adier)? /i          |
-   /Capt(\.|ain)? /i         |
-   /Commander /i             |
-   /Commodore /i             |
-   /Cdr\.? /i                |   # Commander, Commodore
-   /Colonel /i               |
-   /Gen(\.|eral)? /i         |
-   /Field Marshall /i        |
-   /Fl\.? Off\.? /i          |
-   /Flight Officer /i        |
-   /Flt Lt /i                |
-   /Flight Lieutenant /i     |
-   /Pte\. /i                 |
-   /Private /i               |
-   /Sgt\.? /i                |
-   /Sargent /i               |
-   /Air Commander /i         |
-   /Air Commodore /i         |
-   /Air Marshall /i          |
-   /Lieutenant Colonel /i    |
-   /Lt\.? Col\.? /i          |
-   /Lt\.? Gen\.? /i          |
-   /Lt\.? Cdr\.? /i          |
-   /Lieutenant /i            |
-   /(Lt|Leut|Lieut)\.? /i    |
-   /Major General /i         |
-   /Maj\.? Gen\.?/i          |
-   /Major /i                 |
-   /Maj\.? /i                |
+   /Brig(adier)? /i       |
+   /Commander /i          |
+   /Commodore /i          |
+   /Cdr\.? /i             |   # Commander, Commodore
+   /Field Marshall /i     |
+   /Fl\.? Off\.? /i       |
+   /Flight Officer /i     |
+   /Flt Lt /i             |
+   /Flight Lieutenant /i  |
+   /Pte\. /i              |
+   /Private /i            |
+   /Sgt\.? /i             |
+   /Sargent /i            |
+   /Air Commander /i      |
+   /Air Commodore /i      |
+   /Air Marshall /i       |
+   /Lieutenant Colonel /i |
+   /Lt\.? Col\.? /i       |
+   /Lt\.? Gen\.? /i       |
+   /Lt\.? Cdr\.? /i       |
+   /Lieutenant /i         |
+   /(Lt|Leut|Lieut)\.? /i |
+   /Major General /i      |
+   /Maj\.? Gen\.?/i       |
 
    # Religious
-   /Rabbi /i                 |
-   /Brother /i               |
-   /Father /i                |
-   /Chaplain /i              |
-   /Pastor /i                |
-   /Bishop /i                |
-   /Mother Superior /i       |
-   /Mother /i                |
-   /Most Rever[e|a]nd /i     |
-   /Very Rever[e|a]nd /i     |
-   /Mt\.? Revd\.? /i         |
-   /V\.? Revd?\.? /i         |
-   /Revd?\.? /i              |
+   /Rabbi /i              |
+   /Brother /i            |
+   /Chaplain /i           |
+   /Pastor /i             |
+   /Bishop /i             |
+   /Mother Superior /i    |
+   /Mother /i             |
+   /Most Rever[e|a]nd /i  |
+   /Very Rever[e|a]nd /i  |
+   /Mt\.? Revd\.? /i      |
+   /V\.? Revd?\.? /i      |
+   /Revd?\.? /i           |
 
    # Other
-   /Prof(\.|essor)? /i |
+   /Prof(\.|essor)? /i    |
    /Ald(\.|erman)? /i
 };
 
@@ -438,7 +442,7 @@ q{
 # For use with John_Adam_Smith and John_A_Smith name types
 $fixed_length_given_name =
 q{
-	given_name_min_2 : /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
+    given_name_min_2 : /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
 };
 
 
@@ -468,7 +472,7 @@ q{
    middle_name: 
    
    # Dont grab surname prefix too early. For example, John Van Dam could be
-   # interpeted as middle name of Van and Surname of Dam. So exclude prefixs
+   # interpreted as middle name of Van and Surname of Dam. So exclude prefixs
    # from middle names
    ...!prefix /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
    {
@@ -548,8 +552,8 @@ $suffix =
 q{
    suffix:
 
-	  # word boundaries are used to stop partial matches from surnames such as 
-	  # the "VI" in "VINCE"
+      # word boundaries are used to stop partial matches from surnames such as 
+      # the "VI" in "VINCE"
 
       /Esq(\.|uire)?\b ?/i |
       /Sn?r\.?\b ?/i | # Senior
@@ -582,13 +586,18 @@ sub create
 
    if ( $name->{joint_names} )
    {
-	   $grammar .= $rules_joint_names;
-   }	
+       $grammar .= $rules_joint_names;
+   }    
    $grammar .= $rules_single_names;
    
    $grammar .= $precursors;
    $grammar .= $titles;
-   $grammar .= $extended_titles;
+
+    if ( $name->{extended_titles} )
+    {
+        $grammar .= $extended_titles;
+    }
+
    $grammar .= $conjunction;
 
    $grammar .= $single_initial;
@@ -622,6 +631,7 @@ sub create
    $grammar .= $full_surname;
    $grammar .= $suffix;
    $grammar .= $non_matching;
+
 
    return($grammar);
 }

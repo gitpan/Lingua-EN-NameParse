@@ -1,10 +1,16 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.18 28 Mar 2002
+    Fixed bug in rules.t, thanks to Assad Arnaud 
+    Added more reserved words
+    Added option to use a limited set of common titles (improves speed)
+
+
 1.17 21 Mar 2002:
     Added option to remove joint names from grammar (100% speed improvement!)
-    NOTE that by default, joint names (Mr & MRs AB Smith) are not recognized
+    NOTE that by default, joint names (Mr & Mrs AB Smith) are not recognized
 
-    Applied correct captilization to single possessive word, such as French's
+    Applied correct capitalization to single possessive word, such as French's
     Added Dalle, dela and dall' to list of Italian surname prefixes
     Added San to list of Spanish surname prefixes
     Detect reserved words, such as Pty Ltd in pre parse stage
@@ -35,7 +41,7 @@ Revision history for Perl CPAN module Lingua::En::NameParse
 1.14 19 Jul 2001:
     Moved prefixes and suffixes back into grammar tree to stop invalid combinations
     Removed pre parse stage
-    Changed case_surname to correctly capitalise suffixes in roman numeral format
+    Changed case_surname to correctly capitalize suffixes in roman numeral format
     Removed POD directives from README
     Added J_Adam_Smith name type, thanks to Michael Cesar
 

@@ -9,15 +9,15 @@ SYNOPSIS
    # optional configuration arguments
    my %args =
    (
-      salutation     => 'Dear',
-      sal_default    => 'Friend',
-      auto_clean     => 1,
-      force_case     => 1,
-      lc_prefix      => 1,
-      initials       => 3,
-      allow_reversed => 1,
-      joint_names    => 0
-
+      salutation      => 'Dear',
+      sal_default     => 'Friend',
+      auto_clean      => 1,
+      force_case      => 1,
+      lc_prefix       => 1,
+      initials        => 3,
+      allow_reversed  => 1,
+      joint_names     => 0,
+      extended_titles => 1
    );
 
    my $name = new Lingua::EN::NameParse(%args);
@@ -82,7 +82,7 @@ HOW TO INSTALL
 
 AUTHOR
 
-NameParse was written by Kim Ryan, kimaryan@ozemail.com.au
+NameParse was written by Kim Ryan, kimryan@cpan.org
 http://www.data-distillers.com
 
 COPYRIGHT

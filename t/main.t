@@ -1,8 +1,8 @@
 #------------------------------------------------------------------------------
 # Test script for Lingua::EN::NameParse.pm
 #
-# Author: Kim Ryan (kimaryan@ozemail.com.au)
-# Date  : 1 May 1999
+# Author      : Kim Ryan (kimryan@cpan.org)
+# Last update : 23 Mar 2002
 #------------------------------------------------------------------------------
 
 use strict;
@@ -23,12 +23,15 @@ print &case_surname($input) eq 'Big Brother & The Holding Company'
 
 my %args =
 (
-  salutation     => 'Dear',
-  sal_default    => 'Friend',
-  auto_clean     => 1,
-  force_case     => 1,
-  initials       => 3,
-  allow_reversed => 1
+  salutation      => 'Dear',
+  sal_default     => 'Friend',
+  auto_clean      => 1,
+  force_case      => 1,
+  initials        => 3,
+  allow_reversed  => 1,
+  joint_names     => 1,
+  extended_titles => 1
+
 );
 
 my $name = new Lingua::EN::NameParse(%args);

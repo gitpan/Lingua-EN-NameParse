@@ -15,14 +15,14 @@ WriteMakefile
       'SUFFIX'       => 'gz'
    },
    'DISTNAME'        => 'Lingua-EN-NameParse',
-   
+
    ( $] >= 5.005 ?
       (
           ABSTRACT => 'Manipulate peoples names, titles and initials',
-          AUTHOR   => 'Kim Ryan <kimaryan@ozemail.com.au>',
-      ) : () 
+          AUTHOR   => 'Kim Ryan <kimryan@cpan.org>',
+      ) : ()
    ),
-   
+
    'NAME'            => 'Lingua::EN::NameParse',
    'PM'              =>
    {
@@ -30,8 +30,8 @@ WriteMakefile
       'NameGrammar.pm' => '$(INST_LIBDIR)/NameGrammar.pm',
 
    },
-   'PREREQ_PM'       =>         
-   {                            
-      'Parse::RecDescent' => 0, 
-   }                            
+   'PREREQ_PM'       =>
+   {
+      'Parse::RecDescent' => 0,
+   }
 );

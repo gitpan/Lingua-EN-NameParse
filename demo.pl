@@ -12,13 +12,16 @@ print("$input :",&case_surname($input,1),"\n\n");
 
 my %args = 
 (
-   salutation     => 'Dear',
-   sal_default    => 'Friend',
-   auto_clean     => 1,
-   force_case     => 1,
-   lc_prefix      => 0,
-   initials       => 2,
-   allow_reversed => 1  
+   salutation      => 'Dear',
+   sal_default     => 'Friend',
+   auto_clean      => 1,
+   force_case      => 1,
+   lc_prefix       => 0,
+   initials        => 2,
+   allow_reversed  => 1,
+   joint_names     => 1,
+   extended_titles => 1,
+     
 );
 
 my $name = new Lingua::EN::NameParse(%args); 

@@ -9,14 +9,16 @@ Lingua::EN::NameParse - routines for manipulating a person's name
    # optional configuration arguments
    my %args =
    (
-      salutation     => 'Dear',
-      sal_default    => 'Friend',
-      auto_clean     => 1,
-      force_case     => 1,
-      lc_prefix      => 1,
-      initials       => 3,
-      allow_reversed => 1,
-	  joint_names    => 0
+      salutation      => 'Dear',
+      sal_default     => 'Friend',
+      auto_clean      => 1,
+      force_case      => 1,
+      lc_prefix       => 1,
+      initials        => 3,
+      allow_reversed  => 1,
+      joint_names     => 0,
+      extended_titles => 0
+
    );
 
    my $name = new Lingua::EN::NameParse(%args);
@@ -226,6 +228,36 @@ Mr_A_&_B_Smith
 
 Note that if this option is not specified, than by default joint names are 
 ignored. Disabling joint names speeds up the processing a lot.
+
+=item extended_titles
+
+When this option is set to a positive value, all combinations of titles,
+such as Colonel, Mother Superior are used. If this value is not set, only
+the following titles are accounted for:
+
+    Mr
+    Ms
+    M/s
+    Mrs
+    Miss
+    Dr
+    Sir
+    Dame 
+    Reverend
+    Reverand
+    Father
+    Captain
+    Capt
+    Colonel
+    Col
+    General
+    Gen
+    Major
+    Maj
+
+
+Note that if this option is not specified, than by default extended titles
+are ignored. Disabling  extended titles speeds up the processing.
 
 
 =back
@@ -484,7 +516,7 @@ and/or modify it under the terms of the Perl Artistic License
 
 =head1 AUTHOR
 
-NameParse was written by Kim Ryan <kimaryan@ozemail.com.au>
+NameParse was written by Kim Ryan <kimryan@cpan.org>
 <http://www.data-distillers.com>
 
 Thanks to all the people who provided ideas and suggestions, including -
@@ -503,13 +535,14 @@ package Lingua::EN::NameParse;
 
 use 5.001;
 use strict;
+
 use Lingua::EN::NameGrammar;
 use Parse::RecDescent;
 
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.17';
+$VERSION   = '1.18';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -579,15 +612,15 @@ sub parse
    $name = &_pre_parse($name);
    unless ( $name->{error} )
    {
-	   $name = &_assemble($name);
-	   &_validate($name);
+       $name = &_assemble($name);
+       &_validate($name);
 
-	   if ( $name->{error} and $name->{auto_clean} )
-	   {
-	      $name->{input_string} = &clean($name->{input_string});
-	      $name = &_assemble($name);
-	      &_validate($name);
-	   }
+       if ( $name->{error} and $name->{auto_clean} )
+       {
+          $name->{input_string} = &clean($name->{input_string});
+          $name = &_assemble($name);
+          &_validate($name);
+       }
    }
 
    return($name,$name->{error});
@@ -951,10 +984,10 @@ sub _pre_parse
    my $name = shift;
 
    if ( $name->{input_string} =~ 
-   		/\bPty\.? Ltd\.?$|\bLtd\.?$|\bPLC$|National|Association|Society/i )
+        /\bPty\.? Ltd\.?$|\bLtd\.?$|\bPLC$|Association|Department|National|Society/i )
    {
-	   $name->{error} = 1;
-	   $name->{properties}{non_matching} = $name->{input_string};
+       $name->{error} = 1;
+       $name->{properties}{non_matching} = $name->{input_string};
    }
    return($name);
 
