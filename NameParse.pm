@@ -199,7 +199,7 @@ The C<case_all> method converts the first letter of each component to
 capitals and the remainder to lower case, with the following exceptions-
 
    initials remain capitalised
-   surnames such as MacNay-Smith, O'Brien and Van Der Heiden are observed
+   surname spelling such as MacNay-Smith, O'Brien and Van Der Heiden are preserved
    - see C<surname_prefs.txt> for user defined exceptions
 
 A complete definition of the capitalising rules can be found by studying
@@ -436,7 +436,7 @@ use strict;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.01';
+$VERSION   = '1.02';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -698,7 +698,6 @@ q{
    /Matron /i          |
    
    # Legal
-   /J\.? /             |   # Judge
    /Judge /i           |   
    /Justice /i         |   
 
@@ -950,13 +949,12 @@ sub clean
 {
    my ($input_string) = @_;
 
-   # remove illegal characters , why is comma here ????
+   # remove illegal characters
    $input_string =~ s/[^A-Za-z\-\'\.&\/ ]//go;
 
    # remove repeating spaces
    $input_string =~ s/  +/ /go ;
     
-
    # remove any remaining leading or trailing space
    $input_string =~ s/^ //; 
    $input_string =~ s/ $//;

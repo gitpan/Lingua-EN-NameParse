@@ -2,11 +2,16 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
 
+1.02 19 Apr 2000: Removed title J\.? (abbreivation for Judge) as it clashed	
+				  with names such as J A Smith, J. B. Jones etc. Thanks to 
+				  Adam Huffman for spotting this bug
+
+
 1.01 15 Apr 2000: auto_clean option now removes commas from input
-                  Improved regular expressions in 'clean' sub, 
-                    thanks to Mark Summerfield
-                  Catered for initials with dots and spaces, such as A. B. Smith, 
-                    thanks to Adam Huffman
+                  Improved regular expressions in 'clean' sub, thanks to Mark Summerfield
+
+                  Catered for initials with both dots and spaces, such as 
+                  A. B. Smith,  requested by Adam Huffman
 
 1.00 27 Dec 1999: Added user defined file of surname capitalisation over rides
                   Allowed for salutations where precursor is not an estate
