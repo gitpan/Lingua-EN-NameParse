@@ -11,12 +11,14 @@ Lingua::EN::NameParse - routines for manipulating a persons name
       salutation  => 'Dear',
       sal_default => 'Friend',
       auto_clean  => 1,
-      force_case  => 1  
+      force_case  => 1,
+      lc_prefix   => 1,
+      initials    => 3   
    );
 
    my $name = new Lingua::EN::NameParse(%args); 
 
-   $name->parse("MR AC DE SILVA");
+   $error = $name->parse("MR AC DE SILVA");
 
    %my_name = $name->components;
    $surname = $my_name{surname_1};
@@ -25,7 +27,7 @@ Lingua::EN::NameParse - routines for manipulating a persons name
 
    %name = $name->case_components;
 
-   $correct_casing = &case_surname("DE SILVA-MACNAY");
+   $correct_casing = &case_surname("DE SILVA-MACNAY" [,$lc_prefix]);
 
    $good_name = &clean("Bad Na9me");
 
@@ -34,7 +36,6 @@ Lingua::EN::NameParse - routines for manipulating a persons name
    %my_properties = $name->properties;
    $number_surnames = $my_properties{number};
    $bad_input = $my_properties{non_matching};
-
 
 
 =head1 DESCRIPTION
@@ -88,6 +89,18 @@ Perl, version 5.001 or higher and Parse::RecDescent
 
 0.04 16 May 1999: Added test script for rule ordering
                   Added more titles, improved documentation
+                  
+0.10 04 Jul 1999: Allowed for lower casing of surname prefixes
+                  
+0.30 21 Aug 1999: Allowed for user defined length of initials
+                  Added the Mr_John_Smith name type
+                  Added the John_Smith name type
+                  Surnames with the D' prefix now correctly capitalised
+                  
+                  If a parsed name had no components, the components method
+                  returned an odd numbered hash and case_componets returned 1.
+                  Both these methods now return undef in this situation                 
+
 
 
 =head1 AUTHOR

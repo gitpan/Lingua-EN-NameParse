@@ -15,7 +15,8 @@ my %args =
    sal_default => 'Friend',
    auto_clean  => 1,
    force_case  => 1,
-   lc_prefix   => 1  
+   lc_prefix   => 1,
+   initials    => 3  
 );
 
 my $name = new Lingua::EN::NameParse(%args); 
@@ -72,5 +73,7 @@ MR AB AND M/S CD VAN DER HEIDEN-MACNAY
  MR AS & D.E. DE LA MARE
 ESTATE OF THE LATE AB LE FONTAIN
 BIG BROTHER & THE HOLDING COMPANY
+MR TOM JONES
+JAMES BROWN
 MR AS SMI9TH
 prof a.s.d. genius

@@ -26,7 +26,8 @@ my %args =
   salutation  => 'Dear',
   sal_default => 'Friend',
   auto_clean  => 1,
-  force_case  => 1  
+  force_case  => 1,
+  initials    => 3  
 );
 
 my $name = new Lingua::EN::NameParse(%args); 
