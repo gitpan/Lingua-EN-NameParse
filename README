@@ -103,6 +103,10 @@ Perl, version 5.001 or higher and Parse::RecDescent
                   
 0.40 14 Sep 1999: Added the Mr_John_A_Smith and John_A_Smith name types
                   Allowed for hyphenated given names 
+
+1.00 27 Dec 1999: Added user defined file of surname capitalisation over rides
+                  Allowed for salutations where precursor is not an estate
+
                   
 =head1 AUTHOR
 

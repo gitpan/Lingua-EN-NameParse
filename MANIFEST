@@ -3,5 +3,6 @@ README
 Makefile.PL
 demo.pl
 NameParse.pm
+surname_prefs.txt
 t/main.t
 t/rules.t

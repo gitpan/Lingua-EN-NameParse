@@ -76,7 +76,7 @@ lists of names.
 The following terms are used by NameParse to define the components 
 that can make up a name.
 
-   Precursor   - Estate of (The Late) ...
+   Precursor   - Estate of (The Late), Right Honourable ...
    Title       - Mr, Mrs, Ms., Sir, Dr, Major, Reverend ...
    Conjunction - word to separate names or initials, such as "And"
    Initials    - 1-3 letters, each with an optional space and/or dot
@@ -114,7 +114,8 @@ Precursors are only applied to the 'Mr_John_A_Smith','Mr_John_Smith',
 The C<new> method creates an instance of a name object and sets up
 the grammar used to parse names. This must be called before any of the
 following methods are invoked. Note that the object only needs to be
-created once, and can be reused with new input data.
+created ONCE, and can be reused with new input data. Call new repeatedly
+will significantly slow your program down.
 
 Various setup options may be defined in a hash that is passed as an 
 optional argument to the C<new> method.
@@ -142,7 +143,7 @@ must be defined if you are planning to use the C<salutation> method.
 
 This option defines the  defaulting word to substitute for the title and
 surname(s), when parsing fails to identify them. It is also used when a
-precursor occurs. Examples are "Friend" or "Member".It must be defined if 
+precursor occurs. Examples are "Friend" or "Member". It must be defined if 
 you are planning to use the C<salutation> method. If an '&' or 'and' occurs
 in the unmatched section then it is assumed that we are dealing with more than
 one person, and an 's' is appended to the defaulting word.
@@ -186,7 +187,7 @@ Valid settings are 1,2 or 3. If no value is supplied a default of 2 is used.
 The C<parse> method takes a single parameter of a text string containing a 
 name. It attempts to parse the name and break it down into the components 
 described above. If the name was parsed successfully, a 0 is returned, 
-otherwise a 1. This step is a pre-requisite for the following functions.
+otherwise a 1. This step is a prerequisite for the following functions.
 
 
 =head2 case_all
@@ -198,6 +199,7 @@ capitals and the remainder to lower case, with the following exceptions-
 
    initials remain capitalised
    surnames such as MacNay-Smith, O'Brien and Van Der Heiden are observed
+   - see C<surname_prefs.txt> for user defined exceptions
 
 A complete definition of the capitalising rules can be found by studying
 the component grammar defined within the code.
@@ -227,7 +229,7 @@ for each component-
    surname_2
 
 Entries only occur in the hash for each component that the currently parsed
-name has, meaning there are no keys with undefined values.
+name contains, meaning there are no keys with undefined values.
 
 =head2 components
 
@@ -248,11 +250,26 @@ the correct casing for surnames. An optional argument controls the casing
 rules for prefix portions of a surname, as described above in the C<lc_prefix>
 section.
 
+See C<surname_prefs.txt> for user defined exceptions
+
 This function is useful when you know you are only dealing with names that
 do not have initials like "Mr John Jones". It is much faster than the case_all 
 method, but does not understand context, and cannot detect errors on strings
 that are not personal names.
 
+
+=head2 surname_prefs.txt
+
+Some surnames can have more than one form of valid capitalisation, such as
+MacQuarie or Macquarie. Where the user wants to specify one form as the default,
+a text file called surname_prefs.txt should be created and placed in the same
+location as the NameParse module. The text file should contain one surname per 
+line, in the capitalised form you want, such as
+
+   Macquarie
+   MacHado
+   
+NameParse will still operate if  the file does not exist
 
 =head2 salutation
 
@@ -280,7 +297,8 @@ The input is a text string and the output is the string with:
 
 =head2 properties
 
-The C<properties> method return several properties of then name as a hash.
+The C<properties> method returns all the properties of the name,
+non_matching, number and type, as a hash.
 
 =head3 type
 
@@ -298,15 +316,12 @@ The type of format a name is in, as one of the following strings:
    John_Smith
    A_Smith
    unknown
-
-=head3 number
-
-Returns the number of surnames found in the input strings. 
-Unknown name types have a number of 0. 
-
+ 
+   
 =head3 non_matching
 
 Returns any unmatched section that was found.
+   
 
 
 =head1 LIMITATIONS
@@ -352,11 +367,10 @@ Data Dictionary for transfer of street addressing information"
 
 =head1 FUTURE DIRECTIONS
 
-   Allow for a user defined file of local spellings, like duPont, MacHado etc
    Add filtering of very long names
    Add diagnostic messages explaining why parsing failed
    Add transforming methods to do things like remove dots from initials
-   Add suffixes like Senior, Jnr, IV, "The Third'
+   Account for suffixes like Senior, Jnr, IV, "The Third'
    Add awards like OBE, PhD, BSc ...
    Try to derive gender (Mr... is male, Ms, Mrs... is female)
 
@@ -369,6 +383,15 @@ Define grammar for other languages. Hopefully, all that would be needed is
 to specify a new module with its own grammar, and inherit all the existing
 methods. I don't have the knowledge of the naming conventions for non-english 
 languages.
+
+
+=head1 SEE ALSO
+
+Lingua::EN::AddressParse
+Lingua::EN::MatchNames
+Lingua::EN::NickNames
+Lingua::EN::NameCase
+Parse::RecDescent
 
 
 =head1 TO DO
@@ -405,6 +428,10 @@ Add regression tests for all combinations of each component
 0.40 14 Sep 1999: Added the Mr_John_A_Smith and John_A_Smith name types
                   Allowed for hyphenated given names 
                   
+1.00 27 Dec 1999: Added user defined file of surname capitalisation over rides
+                  Allowed for salutations where precursor is not an estate
+                  
+
 =head1 COPYRIGHT
 
 Copyright (c) 1999 Kim Ryan. All rights reserved.
@@ -421,7 +448,7 @@ Thanks to all the people who provided ideas and suggestions, including -
 
    QM Industries <http://www.qmi.com.au>
    Damian Conway <damian@cs.monash.edu.au> author of Parse::RecDescent
-   <mark.summerfield@chest.ac.uk>, author of Text::NameCase, 
+   <mark.summerfield@chest.ac.uk>, author of Lingua::EN::NameCase, 
    Ron Savage <rpsavage@ozemail.com.au>
    <alastair@calliope.demon.co.uk>
 
@@ -437,7 +464,7 @@ use strict;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '0.40';
+$VERSION   = '1.00';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -661,18 +688,18 @@ full_name :
 
 my $precursor = 
 q{ 
-precursor : 
+   precursor : 
 
-	/Estate Of (The Late )?/i |
-   /His (Excellency|Honour) /i | 
-   /Right Hononourable /i |
-   /Rt\.? Hon\.? /i    
+   /Estate Of (The Late )?/i |
+   /His (Excellency|Honou?r) /i | 
+   /(The )?Right Honou?rable /i |
+   /(The )?Rt\.? Hon\.? /i    
 };
 
 my $title = 
 q{
    
-title :
+   title :
 
    /Mrs\.? /i          |
    /M\/s\.? /i         |
@@ -730,7 +757,7 @@ title :
    /Lt\.? ((Col|Gen|Cdr)\. )?/   | 
    /Maj(\.|or)? (Gen(\.|eral)? )? /i | 
 
-   # Religous
+   # Religious
    /Rabbi /i                     |   
    /Brother /i                   |
    /Father /i                    |
@@ -750,7 +777,7 @@ title :
 my $conjunction = q{ conjunction : /And |& /i };
 
 # Used in the John_A_Smith name type. Although this duplicates 
-# $initials_1, it is needed because the middle initial must alway be
+# $initials_1, it is needed because the middle initial must always be
 # one character long, regardless of the length of initials set by the
 # user in the 'new' method. 
 my $middle_initial = q{ middle_initial: /[A-Z]\.? /i };
@@ -770,11 +797,11 @@ my $initials_1 = q{ initials: /[A-Z]\.? /i };
 
 my $initials_2 = 
 q{ 
-	initials: /([A-Z] ){1,2}/i | /([A-Z]){1,2} /i | /([A-Z]\.){1,2} /i
+   initials: /([A-Z] ){1,2}/i | /([A-Z]){1,2} /i | /([A-Z]\.){1,2} /i
 };
 my $initials_3 = 
 q{ 
-	initials: /([A-Z] ){1,3}/i | /([A-Z]){1,3} /i | /([A-Z]\.){1,3} /i
+   initials: /([A-Z] ){1,3}/i | /([A-Z]){1,3} /i | /([A-Z]\.){1,3} /i
 };
 
 my $full_surname = 
@@ -788,13 +815,13 @@ q{
       }
       else
       {
-	      $return = "$item[1]" 
+         $return = "$item[1]" 
       }
    }
 
    sub_surname : prefix(?) name
    {
-      # To prevent warning when compiling with the -w switch,
+      # To prevent warnings when compiling with the -w switch,
       # do not return uninitialized variables.
       if ( $item[1][0] )
       {
@@ -828,7 +855,7 @@ q{
       /L[a|e|o] /i       |      
 
       /[D|L|O]'/i        |   # Italian, Irish or French
-      /St\.? /i          |   # abbrevation for Saint
+      /St\.? /i          |   # abbreviation for Saint
 
       /Den /i            |   # DUTCH
       /Von (Der )?/i     |  
@@ -842,7 +869,7 @@ my $non_matching = q{ non_matching: /.*/ };
 
 #------------------------------------------------------------------------------
 # Hash of of lists, indicating the order that name components are assembled in.
-# Each list element is itself the name of the key value i a name object.
+# Each list element is itself the name of the key value in a name object.
 # Used by the case_all and salutation methods.
 
 my %component_order=
@@ -861,7 +888,7 @@ my %component_order=
 );
 #------------------------------------------------------------------------------
 # Create a new instance of a name parsing object. This step is time consuming
-# and should nornally only be called once in yur program. 
+# and should normally only be called once in your program. 
 
 sub new
 {
@@ -890,30 +917,30 @@ sub new
 
    my $grammar = $rules . $precursor . $title . $conjunction;
    
-   $grammar	.= $middle_initial;
+   $grammar .= $middle_initial;
    
    $name->{initials} > 3 and $name->{initials} = 3;
    $name->{initials} < 1 and $name->{initials} = 1;
    
    # Define limit of when a string is treated as an initial, or
-   # a first name. Fo example, if initials are set to 2, MR TO SMITH
-   # will have initials of T & O and no given anme, but MR TOM SMITH will 
+   # a first name. For example, if initials are set to 2, MR TO SMITH
+   # will have initials of T & O and no given name, but MR TOM SMITH will 
    # have no initials, and a given name of Tom.
    
    if ( $name->{initials} == 1 )
    {
-      $grammar	.= $given_name_min_2 . $initials_1;
+      $grammar .= $given_name_min_2 . $initials_1;
    }
    elsif ( $name->{initials} == 2 )
    {
-      $grammar	.= $given_name_min_3	. $initials_2;
+      $grammar .= $given_name_min_3 . $initials_2;
    }
    elsif ( $name->{initials} == 3 )
    {
-      $grammar	.= $given_name_min_4 . $initials_3;
+      $grammar .= $given_name_min_4 . $initials_3;
    }
    
- 	$grammar	.= $full_surname . $non_matching;
+   $grammar .= $full_surname . $non_matching;
    
    $name->{parse} = new Parse::RecDescent($grammar);
    
@@ -939,7 +966,7 @@ sub parse
    return($name,$name->{error});
 }
 #------------------------------------------------------------------------------
-# Clean the input string. Can be called as a stnad alone function.
+# Clean the input string. Can be called as a stand alone function.
 
 sub clean
 {
@@ -958,20 +985,23 @@ sub clean
    return($input_string);
 }
 #------------------------------------------------------------------------------
+# Return all components in a hash
+
 sub components
 {
    my $name = shift;
    if ( $name->{components} )
    {
-	   return(%{ $name->{components} });
+      return(%{ $name->{components} });
    }
    else
    {
-   	return(undef);
+      return(undef);
    }
 }
 #------------------------------------------------------------------------------
-# Apply correct capitalisation to each component of a person's name
+# Apply correct capitalisation to each component of a person's name.
+# Return all cased components in a hash
 
 sub case_components
 {
@@ -979,8 +1009,8 @@ sub case_components
 
    if ( $name->{properties}{type} eq 'unknown'  )
    {
-   	return(undef);
- 	}
+      return(undef);
+   }
    else
    {
       my %orig_components = $name->components;
@@ -1045,11 +1075,43 @@ sub case_all
    return(join(' ',@cased_name));
 }
 #------------------------------------------------------------------------------
+# The user may specify their own preferred spelling for surnames. 
+# These should be placed in a text file called surname_prefs.txt
+
+BEGIN 
+{
+   my $dir;
+   foreach $dir ( @INC )
+   {
+      if ( open(PREFERENCES_FH,"<$dir/Lingua/EN/surname_prefs.txt") )
+      {
+         my @surnames = <PREFERENCES_FH>;
+         my $name;
+         foreach $name ( @surnames )
+         {
+            chomp($name);
+            # Build hash, lower case name is key for case insensitive
+            # comparison, while value holds the actual capitalisation
+            $Lingua::EN::surname_preferences{lc($name)} = $name;
+         }
+         close(PREFERENCES_FH);
+         last;
+      }
+   }
+}  
+#------------------------------------------------------------------------------
 # Apply correct capitalisation to a person's surname
 
 sub case_surname
 {
    my ($surname,$lc_prefix) = @_;
+
+   # If the user has specified a preferred capitalisation for this
+   # surname it should be returned now.   
+   if ($Lingua::EN::surname_preferences{lc($surname)} )
+   {
+      return($Lingua::EN::surname_preferences{lc($surname)});
+   }
 
    # Lowercase everything
    $_ = lc($surname);  
@@ -1066,14 +1128,14 @@ sub case_surname
    {
       s/\b(Mac)([a-z]+)/$1\u$2/ig;
 
-      # Now correct for "Mac" exceptions
+      # Now correct for "Mac" exceptions. Note that these can be 
+      # overridden from the surname_prefs.txt file
       s/MacHin/Machin/;
       s/MacHlin/Machlin/;
       s/MacHar/Machar/;
       s/MacKle/Mackle/;
       s/MacKlin/Macklin/;
       s/MacKie/Mackie/;
-      s/MacQuarie/Macquarie/;
 
       # Portuguese
       s/MacHado/Machado/;        
@@ -1115,8 +1177,10 @@ sub salutation
    my @salutation;
    push(@salutation,$name->{salutation});
 
-   if ( $name->{error} or $name->{components}{precursor} or 
-      not $name->{components}{title_1} )
+   if ( $name->{error} or
+   # Salutations cannot be created for Estates 
+   ( $name->{components}{precursor} and $name->{components}{precursor} =~ /Estate/i)  or 
+   not $name->{components}{title_1} )
    {
       # create salutation in the form: Dear Friend(s)?
       my $default = $name->{sal_default};
@@ -1139,10 +1203,10 @@ sub salutation
       my (@cased_components,$component);
       foreach $component ( @order )
       {
-         unless ( $component =~ /initial/ or not $component_vals{$component} )
+         unless ( $component =~ /initial|precursor/ or not $component_vals{$component} )
          {
             push(@salutation,$component_vals{$component});
-            # shared initial and surname (eg borthers), so duplicate title_1
+            # shared initial and surname (eg brothers), so duplicate title_1
             if ( $name->{properties}{type} eq 'Mr_A_&_B_Smith' and $component eq 'conjunction_1' )
             {
                push(@salutation,$component_vals{title_1});
@@ -1153,6 +1217,8 @@ sub salutation
    return(join(' ',@salutation));
 }
 #------------------------------------------------------------------------------
+# Return all name properties in a hash
+
 sub properties
 {
    my $name = shift;
@@ -1163,6 +1229,8 @@ sub properties
 # PRIVATE METHODS
 
 #------------------------------------------------------------------------------
+# Assemble hashes of components and properties as part of the name object 
+
 sub _assemble
 {
    my $name = shift;
@@ -1231,6 +1299,7 @@ sub _assemble
    return($name);
 }
 #------------------------------------------------------------------------------
+# Remove trailing space
 sub _trim_space
 {
    my ($string) = @_;
@@ -1238,7 +1307,7 @@ sub _trim_space
    return($string);
 }
 #------------------------------------------------------------------------------
-
+# Check if name has illegal characters or no vowel sound
 sub _validate
 {
    my $name = shift;
@@ -1253,18 +1322,15 @@ sub _validate
       $name->{error} = 1;
    }
 
-   # no vowel sound in name(s)
-   elsif ( $name->{components}{given_name_1} and 
-   	$name->{components}{given_name_1} !~ /[a|e|i|o|u|y|j]/i )
+   elsif ( not &_valid_name($name->{components}{given_name_1}) )
    {
       $name->{error} = 1;
    }
-   elsif ( $name->{components}{surname_1} !~ /[a|e|i|o|u|y|j]|^Ng$/i )
+   elsif ( not &_valid_name($name->{components}{surname_1}) )
    {
       $name->{error} = 1;
    }
-   elsif ( $name->{components}{surname_2} and 
-      $name->{components}{surname_2} !~ /[a|e|i|o|u|y|j]|^Ng$/i )
+   elsif ( not &_valid_name($name->{components}{surname_2}) )
    {
       $name->{error} = 1;
    }
@@ -1274,7 +1340,26 @@ sub _validate
    }
 }
 #------------------------------------------------------------------------------
-# Upper case first letter, lower case the rest for all words in string
+# If the name has an assigned value, check that it contains a vowel sound
+sub _valid_name
+{
+   my ($name) = @_;
+   if ( not $name )
+   {
+      return(1);
+   }
+   # names should have a vowel sound, Ng is OK in Vietnamese
+   elsif ( $name and $name =~ /[a|e|i|o|u|y|j]|^Ng$/i )
+   {
+      return(1);
+   }
+   else
+   {
+      return(0);
+   }
+}
+#------------------------------------------------------------------------------
+# Upper case first letter, lower case the rest, for all words in string
 sub _case_word
 {
    my ($word) = @_;
