@@ -19,7 +19,7 @@ WriteMakefile
    ( $] >= 5.005 ?
       (
           ABSTRACT => 'Manipulate peoples names, titles and initials',
-          AUTHOR   => 'Kim Ryan <kimryan@cpan.org>',
+          AUTHOR   => 'Kim Ryan',
       ) : ()
    ),
 

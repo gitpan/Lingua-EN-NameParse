@@ -18,7 +18,7 @@ for more details.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1999-2002 Kim Ryan. All rights reserved.
+Copyright (c) 1999-2004 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).
@@ -320,21 +320,7 @@ q{
 
    /Dr\.? /i           |
    /Sir /i             |
-   /Dame /i            |
-
-   /Rever[e|a]nd /i    |
-   /Father /i          |
-
-   /Captain /i         |
-   /Capt\.? /i         |
-   /Colonel /i         |
-   /Col\.? /i          |
-   /Gen(\.|eral)? /i   |
-   /Gen\. /i           |
-   /Major /i           |
-   /Maj\.? /i
-
-
+   /Dame /i            
 
 };
    
@@ -366,6 +352,10 @@ q{
 
    # Military
    /Brig(adier)? /i       |
+   /Captain /i            |
+   /Capt\.? /i            |
+   /Colonel /i            |
+   /Col\.? /i             |
    /Commander /i          |
    /Commodore /i          |
    /Cdr\.? /i             |   # Commander, Commodore
@@ -374,6 +364,8 @@ q{
    /Flight Officer /i     |
    /Flt Lt /i             |
    /Flight Lieutenant /i  |
+   /Gen(\.|eral)? /i      |
+   /Gen\. /i              |
    /Pte\. /i              |
    /Private /i            |
    /Sgt\.? /i             |
@@ -389,20 +381,26 @@ q{
    /(Lt|Leut|Lieut)\.? /i |
    /Major General /i      |
    /Maj\.? Gen\.?/i       |
+   /Major /i              |
+   /Maj\.? /i
+
 
    # Religious
    /Rabbi /i              |
+   /Bishop /i             |
    /Brother /i            |
    /Chaplain /i           |
+   /Father /i             |
    /Pastor /i             |
-   /Bishop /i             |
    /Mother Superior /i    |
    /Mother /i             |
    /Most Rever[e|a]nd /i  |
    /Very Rever[e|a]nd /i  |
+   /Rever[e|a]nd /i       |
    /Mt\.? Revd\.? /i      |
    /V\.? Revd?\.? /i      |
    /Revd?\.? /i           |
+
 
    # Other
    /Prof(\.|essor)? /i    |

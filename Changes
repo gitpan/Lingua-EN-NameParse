@@ -1,5 +1,14 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.20 16 Feb 2004
+    Fixed bug that was preventing some extended titles, such as 'Major General'
+    from working
+
+1.19 27 Dec 2003
+    Fixed bug in rules.t, thanks to Assad Arnaud 
+    Added more vailid surnames in _valid_name, thanks to Peter Schendzielorz
+
+
 1.18 28 Mar 2002
     Fixed bug in rules.t, thanks to Assad Arnaud 
     Added more reserved words

@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # File  : rules.t - test script for Lingua::EN::NameParse.pm
 #
-# Author      : Kim Ryan (kimryan@cpan.org)
+# Author      : Kim Ryan
 # Last update : 23 Mar 2002
 #------------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ BEGIN { print "1..13\n"; }
 
 my %args =
 (
-	joint_names => 1
+    joint_names => 1
 );
 
 my $name = new Lingua::EN::NameParse(%args);

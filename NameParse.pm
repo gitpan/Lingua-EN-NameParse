@@ -541,7 +541,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.19';
+$VERSION   = '1.20';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -564,7 +564,6 @@ sub new
    # 'initials' as a key in the hash supplied to new method.
    $name->{initials} = 2;
 
-   # ADD ERROR CHECKING FOR INVALID KEYS
    my $current_key;
    foreach my $current_key (keys %args)
    {
@@ -1145,7 +1144,7 @@ sub _validate
 }
 #-------------------------------------------------------------------------------
 # If the name has an assigned value, check that it contains a vowel sound,
-# or matchesthe exceptions to this rule.
+# or matches the exceptions to this rule.
 # Returns 1 if name is valid, otherwise 0
 
 sub _valid_name
