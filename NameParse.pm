@@ -29,8 +29,8 @@ Lingua::EN::NameParse - routines for manipulating a person's name
    $surname = $name_comps{surname_1}; # DE SILVA
 
    $correct_casing = $name->case_all; # Mr AC de Silva
-   
-   $correct_casing = $name->case_all_reversed ; # de Silva, AC    
+
+   $correct_casing = $name->case_all_reversed ; # de Silva, AC
 
    $good_name = &clean("Bad Na9me   "); # "Bad Name"
 
@@ -226,7 +226,7 @@ Mr_A_&_Ms_B_Smith
 Mr_&_Ms_A_Smith
 Mr_A_&_B_Smith
 
-Note that if this option is not specified, than by default joint names are 
+Note that if this option is not specified, than by default joint names are
 ignored. Disabling joint names speeds up the processing a lot.
 
 =item extended_titles
@@ -242,7 +242,7 @@ the following titles are accounted for:
     Miss
     Dr
     Sir
-    Dame 
+    Dame
     Reverend
     Reverand
     Father
@@ -293,11 +293,11 @@ The method returns the entire cased name as text.
     $correct_casing = $name->case_all_reversed;
 
 The C<case_all_reversed> method applies the same type of casing as
-C<case_all>. However, the name is returned as surname followed by a comma 
-and the rest of the name, which can be any of the combinations allowed 
+C<case_all>. However, the name is returned as surname followed by a comma
+and the rest of the name, which can be any of the combinations allowed
 for a name, except the title. Some examples are: "Smith, John", "De Silva, A.B."
 This is useful for sorting names alphabetically by surname.
- 
+
 The method returns the entire reverse order cased name as text.
 
 
@@ -324,7 +324,7 @@ for each component-
    surname_2
    suffix
 
-If a key has no matching data for a given name, it's values will be 
+If a key has no matching data for a given name, it's values will be
 set to the empty string.
 
 
@@ -342,11 +342,11 @@ conversion.
    $correct_casing = &case_surname("DE SILVA-MACNAY" [,$lc_prefix]);
 
 C<case_surname> is a stand alone function that does not require a name
-object. The input is a text string. An optional input argument controls the 
-casing rules for prefix portions of a surname, as described above in the 
+object. The input is a text string. An optional input argument controls the
+casing rules for prefix portions of a surname, as described above in the
 C<lc_prefix> section.
 
-The output is a string converted to the correct casing for surnames. 
+The output is a string converted to the correct casing for surnames.
 See C<surname_prefs.txt> for user defined exceptions
 
 This function is useful when you know you are only dealing with names that
@@ -493,7 +493,7 @@ languages.
 
 =head1 SEE ALSO
 
-Lingua::EN::AddressParse, Lingua::EN::MatchNames, Lingua::EN::NickNames, 
+Lingua::EN::AddressParse, Lingua::EN::MatchNames, Lingua::EN::NickNames,
 Lingua::EN::NameCase, Parse::RecDescent
 
 
@@ -508,7 +508,7 @@ and not be retained with the suffix.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1999-2002 Kim Ryan. All rights reserved.
+Copyright (c) 1999-2004 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).
@@ -516,16 +516,15 @@ and/or modify it under the terms of the Perl Artistic License
 
 =head1 AUTHOR
 
-NameParse was written by Kim Ryan <kimryan@cpan.org>
-<http://www.data-distillers.com>
+NameParse was written by Kim Ryan <kimryan at cpan dot org>
 
 Thanks to all the people who provided ideas and suggestions, including -
 
    QM Industries <http://www.qmi.com.au>
-   Damian Conway <damian@cs.monash.edu.au> author of Parse::RecDescent
-   <mark.summerfield@chest.ac.uk>, author of Lingua::EN::NameCase,
-   Ron Savage <rpsavage@ozemail.com.au>
-   <alastair@calliope.demon.co.uk>, Adam Huffman, Douglas Wilson
+   Damian Conway,  author of Parse::RecDescent
+   Mark Summerfield author of Lingua::EN::NameCase,
+   Ron Savage, Alastair Adam Huffman, Douglas Wilson
+   Peter Schendzielorz
 
 =cut
 
@@ -542,7 +541,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.18';
+$VERSION   = '1.19';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -1105,7 +1104,9 @@ sub _trim_space
    return($string);
 }
 #-------------------------------------------------------------------------------
-# Check if name has illegal characters
+# Check if any name components have illegal characters, or do not have the
+# correct syntax for a valid name.
+
 
 sub _validate
 {
@@ -1143,7 +1144,8 @@ sub _validate
    }
 }
 #-------------------------------------------------------------------------------
-# If the name has an assigned value, check that it contains a vowel sound
+# If the name has an assigned value, check that it contains a vowel sound,
+# or matchesthe exceptions to this rule.
 # Returns 1 if name is valid, otherwise 0
 
 sub _valid_name
@@ -1153,8 +1155,9 @@ sub _valid_name
    {
       return(1);
    }
-   # names should have a vowel sound, Ng is OK in Vietnamese
-   elsif ( $name and $name =~ /[a|e|i|o|u|y|j]|^Ng$/i )
+   # Names should have a vowel sound, 
+   # valid exceptions are Ng, Tsz,Md, Cng,Hng,Chng etc
+   elsif ( $name and $name =~ /[aeiouyj]|^(ng|tsz|md|(c?h|[pts])ng)$/i )
    {
       return(1);
    }

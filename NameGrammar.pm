@@ -25,8 +25,7 @@ and/or modify it under the terms of the Perl Artistic License
 
 =head1 AUTHOR
 
-NameGrammar was written by Kim Ryan <kimryan@cpan.org>.
-<http://www.data-distillers.com>
+NameGrammar was written by Kim Ryan <kimryan at cpan dot org>.
 
 
 
