@@ -1,5 +1,8 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.16 24 Sep 2001:
+    Minor additions to README file
+
 1.15 25 Jul 2001:
     Added more complete list to surname_prefs.txt
 

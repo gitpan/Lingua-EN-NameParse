@@ -129,7 +129,7 @@ A_Smith
 The C<new> method creates an instance of a name object and sets up
 the grammar used to parse names. This must be called before any of the
 following methods are invoked. Note that the object only needs to be
-created ONCE, and can be reused with new input data. Calling C<new>
+created ONCE, and should be reused with new input data. Calling C<new>
 repeatedly will significantly slow your program down.
 
 Various setup options may be defined in a hash that is passed as an optional
@@ -418,7 +418,6 @@ as a valid name, first name National etc. Supplying  a list of common pronouns
 as exceptions could solve this problem.
 
 
-
 =head1 REFERENCES
 
 "The Wordsworth Dictionary of Abbreviations & Acronyms" (1997)
@@ -453,8 +452,6 @@ Lingua::EN::NameCase, Parse::RecDescent
 
 =head1 TO DO
 
-Add regression tests for all combinations of each component
-
 
 =head1 BUGS
 
@@ -472,7 +469,9 @@ and/or modify it under the terms of the Perl Artistic License
 
 =head1 AUTHOR
 
-NameParse was written by Kim Ryan <kimaryan@ozemail.com.au> in 1999.
+NameParse was written by Kim Ryan <kimaryan@ozemail.com.au>
+<http://members.ozemail.com.au/~kimaryan/data_distillers/>
+
 Thanks to all the people who provided ideas and suggestions, including -
 
    QM Industries <http://www.qmi.com.au>
@@ -495,7 +494,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.15';
+$VERSION   = '1.16';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -711,8 +710,8 @@ sub case_all
    return(join(' ',@cased_name));
 }
 #-------------------------------------------------------------------------------
-# Apply correct capitalisation to a person's entire name !!!
-# Return a string of all cased components in correct order
+# Apply correct capitalisation to a person's entire name 
+# Return a string of all cased components in correct reversed order
 
 sub case_all_reversed
 {
@@ -868,8 +867,7 @@ sub salutation
    if
    (
       $name->{error} or
-      ( $name->{components}{precursor} and
-        $name->{components}{precursor} =~ /Estate/i)  or
+      ( $name->{components}{precursor} and  $name->{components}{precursor} =~ /Estate/i)  or
       not $name->{components}{title_1}
    )
    {

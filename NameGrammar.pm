@@ -25,7 +25,9 @@ and/or modify it under the terms of the Perl Artistic License
 
 =head1 AUTHOR
 
-NameGrammar was written by Kim Ryan <kimaryan@ozemail.com.au> in 1999.
+NameGrammar was written by Kim Ryan <kimaryan@ozemail.com.au>.
+<http://members.ozemail.com.au/~kimaryan/data_distillers/>
+
 
 
 =cut
@@ -453,7 +455,7 @@ $middle_name =
 q{
    middle_name: 
    
-   # Dont grab surname prefix to ealry. For example, John Van Dam could be
+   # Dont grab surname prefix too early. For example, John Van Dam could be
    # interpeted as middle name of Van and Surname of Dam. SO exclude prefixs
    # from middle names
    ...!prefix /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
