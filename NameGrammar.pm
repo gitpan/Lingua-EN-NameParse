@@ -18,7 +18,7 @@ for more details.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1999-2001 Kim Ryan. All rights reserved.
+Copyright (c) 1999-2002 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).
@@ -26,7 +26,7 @@ and/or modify it under the terms of the Perl Artistic License
 =head1 AUTHOR
 
 NameGrammar was written by Kim Ryan <kimaryan@ozemail.com.au>.
-<http://members.ozemail.com.au/~kimaryan/data_distillers/>
+<http://www.data-distillers.com>
 
 
 
@@ -38,10 +38,10 @@ package Lingua::EN::NameGrammar;
 
 # Rules that define valid orderings of a names components
 
-$rules =
-q{
+$rules_start = q{ full_name : };
 
-full_name :
+$rules_joint_names =
+q{
 
    # A (?) refers to an optional component, occurring 0 or more times.
    # Optional items are returned as an array, which for our case will
@@ -138,10 +138,15 @@ full_name :
          initials_1    => $item[4],
          surname_1     => $item[5],
          non_matching  => $item[6][0],
+         number        => 2,
          type          => 'Mr_&_Ms_A_Smith'
       }
    }
    |
+};
+
+$rules_single_names =
+q{
 
    precursor(?) title given_name single_initial surname suffix(?) non_matching(?)
    {
@@ -286,7 +291,7 @@ full_name :
 # Individual components that a name can be composed from. Components are
 # expressed as literals or Perl regular expressions.
 
-$precursor =
+$precursors =
 q
 {
     precursor : 
@@ -303,31 +308,41 @@ q
 
 };
 
-$title =
+$titles =
 q{
 
    title :
 
-   /Mrs\.? /i          |
-   /M\/s\.? /i         |
-   /Ms\.? /i           |
-   /Miss\.? /i         |
-   /Mme\.? /i          |   # Madame
-
    /Mr\.? /i           |
+   /Ms\.? /i           |
+   /M\/s\.? /i         |
+   /Mrs\.? /i          |
+   /Miss\.? /i         |
+
+   /Dr\.? /i           |
+   /Sir /i             |
+   /Dame /i            |
+
+   /Rever[e|a]nd /i    |
+
+   /Lord /i            |
+   /Lady /i            
+
+};
+   
+$extended_titles =
+q{
+  
+					   |
    /Messrs /i          |   # plural or Mr
+   /Mme\.? /i          |   # Madame
    /Mister /i          |
    /Mast(\.|er)? /i    |
    /Ms?gr\.? /i        |   # Monsignor
 
-   /Sir /i             |
-   /Lord /i            |
-   /Lady /i            |
    /Madam(e)? /i       |
-   /Dame /i            |
 
    # Medical
-   /Dr\.? /i           |
    /Doctor /i          |
    /Sister /i          |
    /Matron /i          |
@@ -366,7 +381,6 @@ q{
    /Lt\.? Cdr\.? /i          |
    /Lieutenant /i            |
    /(Lt|Leut|Lieut)\.? /i    |
-   /Marshall /i              |
    /Major General /i         |
    /Maj\.? Gen\.?/i          |
    /Major /i                 |
@@ -385,13 +399,11 @@ q{
    /Very Rever[e|a]nd /i     |
    /Mt\.? Revd\.? /i         |
    /V\.? Revd?\.? /i         |
-   /Rever[e|a]nd /i          |
    /Revd?\.? /i              |
 
    # Other
    /Prof(\.|essor)? /i |
    /Ald(\.|erman)? /i
-
 };
 
 $conjunction = q{ conjunction : /And |& /i };
@@ -456,7 +468,7 @@ q{
    middle_name: 
    
    # Dont grab surname prefix too early. For example, John Van Dam could be
-   # interpeted as middle name of Van and Surname of Dam. SO exclude prefixs
+   # interpeted as middle name of Van and Surname of Dam. So exclude prefixs
    # from middle names
    ...!prefix /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
    {
@@ -511,7 +523,9 @@ q{
       /Ben /i            |   # Hebrew
 
       /Dell([a|e])? /i   |   # ITALIAN
-      /Dell'/i           |
+      /Dalle /i          |
+      /D[a|e]ll'/i       |
+      /Dela /i           |
       /Del /i            |
       /De (La |Los )?/i  |
       /D[a|i|u] /i       |
@@ -519,6 +533,7 @@ q{
 
       /[D|L|O]'/i        |   # Italian, Irish or French
       /St\.? /i          |   # abbreviation for Saint
+      /San /i            |   # Spanish
 
       /Den /i            |   # DUTCH
       /Von (Der )?/i     |
@@ -563,7 +578,18 @@ sub create
 {
    my $name = shift;
 
-   my $grammar = $rules . $precursor . $title . $conjunction;
+   my $grammar = $rules_start;
+
+   if ( $name->{joint_names} )
+   {
+	   $grammar .= $rules_joint_names;
+   }	
+   $grammar .= $rules_single_names;
+   
+   $grammar .= $precursors;
+   $grammar .= $titles;
+   $grammar .= $extended_titles;
+   $grammar .= $conjunction;
 
    $grammar .= $single_initial;
 

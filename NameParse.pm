@@ -15,7 +15,8 @@ Lingua::EN::NameParse - routines for manipulating a person's name
       force_case     => 1,
       lc_prefix      => 1,
       initials       => 3,
-      allow_reversed => 1
+      allow_reversed => 1,
+	  joint_names    => 0
    );
 
    my $name = new Lingua::EN::NameParse(%args);
@@ -212,6 +213,20 @@ The program change the order of the name back to the non reversed format, and
 then performs the normal parsing. Note that if the name can be parsed, the fact
 that it's order was originally reversed, is not recorded as a property of the
 name object.
+
+=item joint_names
+
+When this option is set to a positive value, joint names are accounted for:
+
+Mr_A_Smith_&_Ms_B_Jones
+Mr_&_Ms_A_&_B_Smith
+Mr_A_&_Ms_B_Smith
+Mr_&_Ms_A_Smith
+Mr_A_&_B_Smith
+
+Note that if this option is not specified, than by default joint names are 
+ignored. Disabling joint names speeds up the processing a lot.
+
 
 =back
 
@@ -461,7 +476,7 @@ and not be retained with the suffix.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1999-2001 Kim Ryan. All rights reserved.
+Copyright (c) 1999-2002 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).
@@ -470,7 +485,7 @@ and/or modify it under the terms of the Perl Artistic License
 =head1 AUTHOR
 
 NameParse was written by Kim Ryan <kimaryan@ozemail.com.au>
-<http://members.ozemail.com.au/~kimaryan/data_distillers/>
+<http://www.data-distillers.com>
 
 Thanks to all the people who provided ideas and suggestions, including -
 
@@ -494,7 +509,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.16';
+$VERSION   = '1.17';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -518,16 +533,16 @@ sub new
    $name->{initials} = 2;
 
    # ADD ERROR CHECKING FOR INVALID KEYS
-   my $curr_key;
-   foreach my $curr_key (keys %args)
+   my $current_key;
+   foreach my $current_key (keys %args)
    {
-      if ( $curr_key eq 'salutation' or $curr_key eq 'sal_default' )
+      if ( $current_key eq 'salutation' or $current_key eq 'sal_default' )
       {
-         $name->{$curr_key} = &_case_word($args{$curr_key});
+         $name->{$current_key} = &_case_word($args{$current_key});
       }
       else
       {
-         $name->{$curr_key} = $args{$curr_key};
+         $name->{$current_key} = $args{$current_key};
       }
    }
 
@@ -544,7 +559,7 @@ sub parse
 
    chomp($input_string);
 
-   # If reverse orders names are allowed, swap the surname component, before
+   # If reverse ordered names are allowed, swap the surname component, before
    # the comma, with the rest of the name. Rejoin the name, replacing comma
    # with a space.
 
@@ -556,16 +571,23 @@ sub parse
 
    $name->{components} = ();
    $name->{properties} = ();
+   $name->{properties}{type} = 'unknown';
+   $name->{error} = 0;
+
    $name->{input_string} = $input_string;
 
-   $name = &_assemble($name);
-   &_validate($name);
-
-   if ( $name->{error} and $name->{auto_clean} )
+   $name = &_pre_parse($name);
+   unless ( $name->{error} )
    {
-      $name->{input_string} = &clean($name->{input_string});
-      $name = &_assemble($name);
-      &_validate($name);
+	   $name = &_assemble($name);
+	   &_validate($name);
+
+	   if ( $name->{error} and $name->{auto_clean} )
+	   {
+	      $name->{input_string} = &clean($name->{input_string});
+	      $name = &_assemble($name);
+	      &_validate($name);
+	   }
    }
 
    return($name,$name->{error});
@@ -613,24 +635,24 @@ sub case_components
     {
         my %orig_components = $name->components;
 
-        my ($curr_key,%cased_components);
-        foreach $curr_key ( keys %orig_components )
+        my ($current_key,%cased_components);
+        foreach $current_key ( keys %orig_components )
         {
             my $cased_value;
-            if ( $curr_key =~ /initials/ ) # intials_1, possibly initials_2
+            if ( $current_key =~ /initials/ ) # intials_1, possibly initials_2
             {
-                $cased_value = uc($orig_components{$curr_key});
+                $cased_value = uc($orig_components{$current_key});
             }
-            elsif ( $curr_key =~ /surname|suffix/ )
+            elsif ( $current_key =~ /surname|suffix/ )
             {
-               $cased_value = &case_surname($orig_components{$curr_key},$name->{lc_prefix});
+               $cased_value = &case_surname($orig_components{$current_key},$name->{lc_prefix});
             }
             else
             {
-                $cased_value = &_case_word($orig_components{$curr_key});
+                $cased_value = &_case_word($orig_components{$current_key});
             }
 
-            $cased_components{$curr_key} = $cased_value;
+            $cased_components{$current_key} = $cased_value;
         }
         return(%cased_components);
     }
@@ -830,11 +852,13 @@ sub case_surname
       s/\b(\w+ )/\l$1/g;
    }
 
-   # Correct for possevives such as "John's" or "Australia's". Alhough this
+   # Correct for possessives such as "John's" or "Australia's". Although this
    # should not occur in a person's name, they are valid for proper names.
    # As this subroutine may be used to capitalise words other than names,
    # we need to account for this case.
    s/(\w+)'S(\s+)/$1's$2/;
+   s/(\w+)'S/$1's/;
+
 
    # Correct for roman numerals, excluding single letter cases I,V and X,
    # which will work with the above code
@@ -920,6 +944,21 @@ sub properties
 
 # PRIVATE METHODS
 
+#-------------------------------------------------------------------------------
+# Check that common reserved word (as found in company names) do not appear
+sub _pre_parse
+{
+   my $name = shift;
+
+   if ( $name->{input_string} =~ 
+   		/\bPty\.? Ltd\.?$|\bLtd\.?$|\bPLC$|National|Association|Society/i )
+   {
+	   $name->{error} = 1;
+	   $name->{properties}{non_matching} = $name->{input_string};
+   }
+   return($name);
+
+}
 #-------------------------------------------------------------------------------
 # Initialise all components to empty string. Assemble hashes of components 
 # and properties as part of the name object

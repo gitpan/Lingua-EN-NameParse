@@ -6,7 +6,8 @@ use Lingua::EN::NameParse qw(&case_surname &clean);
 
 
 # Quick casing, no parsing or context check
-$input = "DE TANGELO";
+$input = "FRENCH'S";
+
 print("$input :",&case_surname($input,1),"\n\n");
 
 my %args = 
