@@ -462,7 +462,7 @@ use strict;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.10';
+$VERSION   = '1.11';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -969,7 +969,8 @@ sub _assemble
    return($name);
 }
 #-------------------------------------------------------------------------------
-# Remove trailing space
+# Remove any trailing spaces
+
 sub _trim_space
 {
    my ($string) = @_;
@@ -977,7 +978,7 @@ sub _trim_space
    return($string);
 }
 #-------------------------------------------------------------------------------
-# Check if name has illegal characters or no vowel sound
+# Check if name has illegal characters
 
 sub _validate
 {
@@ -1012,6 +1013,7 @@ sub _validate
 }
 #-------------------------------------------------------------------------------
 # If the name has an assigned value, check that it contains a vowel sound
+
 sub _valid_name
 {
    my ($name) = @_;

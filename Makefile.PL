@@ -26,7 +26,9 @@ WriteMakefile
    'NAME'            => 'Lingua::EN::NameParse',
    'PM'              =>
    {
-      'NameParse.pm' => '$(INST_LIBDIR)/NameParse.pm',
+      'NameParse.pm'   => '$(INST_LIBDIR)/NameParse.pm',
+      'NameGrammar.pm' => '$(INST_LIBDIR)/NameGrammar.pm',
+
    },
    'PREREQ_PM'       =>         
    {                            
