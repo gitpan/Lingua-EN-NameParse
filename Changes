@@ -1,6 +1,9 @@
 
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.05  7 Jan 2001: Updated README file
+                  Added test of lower casing prefixes to rules.t
+
 1.04 10 Dec 2000: Allowed for reversed order names where the surname appears
                   first, followed by a comma and the rest of the name, such as
                   title, first name, initials etc.

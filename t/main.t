@@ -10,7 +10,7 @@ use Lingua::EN::NameParse qw(clean case_surname);
 
 # We start with some black magic to print on failure.
 
-BEGIN { print "1..10\n"; }
+BEGIN { print "1..11\n"; }
 
 # Main tests
 
@@ -106,6 +106,11 @@ else
 {
 	print "not ok 10\n";
 }
+
+my $lc_prefix = 1;
+# Test lower casing of surname prefix
+print &case_surname("DE SILVA-MACNAY",$lc_prefix) eq 'de Silva-MacNay' ?  "ok 11\n" : "not ok 11\n";
+
 
 
 

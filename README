@@ -6,14 +6,16 @@ Lingua::EN::NameParse - routines for manipulating a persons name
 
    use Lingua::EN::NameParse qw(clean case_surname);
 
+   # optional configuration arguments
    my %args = 
    (
-      salutation  => 'Dear',
-      sal_default => 'Friend',
-      auto_clean  => 1,
-      force_case  => 1,
-      lc_prefix   => 1,
-      initials    => 3   
+      salutation     => 'Dear',
+      sal_default    => 'Friend',
+      auto_clean     => 1,
+      force_case     => 1,
+      lc_prefix      => 1,
+      initials       => 3,   
+      allow_reversed => 1   
    );
 
    my $name = new Lingua::EN::NameParse(%args); 
@@ -80,7 +82,7 @@ NameParse was written by Kim Ryan <kimaryan@ozemail.com.au>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1999,2000 Kim Ryan. All rights reserved.
+Copyright (c) 1999,2001 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it 
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).

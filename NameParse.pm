@@ -6,6 +6,7 @@ Lingua::EN::NameParse - routines for manipulating a persons name
 
    use Lingua::EN::NameParse qw(clean case_surname);
 
+   # optional configuration arguments
    my %args = 
    (
       salutation     => 'Dear',
@@ -15,7 +16,6 @@ Lingua::EN::NameParse - routines for manipulating a persons name
       lc_prefix      => 1,
       initials       => 3,   
       allow_reversed => 1   
-      
    );
 
    my $name = new Lingua::EN::NameParse(%args); 
@@ -35,7 +35,7 @@ Lingua::EN::NameParse - routines for manipulating a persons name
    $number_surnames = $my_properties{number}; # 1
    $bad_input = $my_properties{non_matching};
 
-	$lc_prefix = 0;
+   $lc_prefix = 0;
    $correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
 
 =head1 REQUIRES
@@ -119,11 +119,13 @@ Suffixes are only applied to the 'Mr_John_A_Smith','Mr_John_Smith',
 The C<new> method creates an instance of a name object and sets up
 the grammar used to parse names. This must be called before any of the
 following methods are invoked. Note that the object only needs to be
-created ONCE, and can be reused with new input data. Call new repeatedly
-will significantly slow your program down.
+created ONCE, and can be reused with new input data. Calling C<new> 
+repeatedly will significantly slow your program down.
 
 Various setup options may be defined in a hash that is passed as an optional 
-argument to the C<new> method. Note that all the arguments as well
+argument to the C<new> method. Note that all the arguments are optional. You
+need to define the combination of arguments that are appropriate for your
+usage.
 
    my %args = 
    (
@@ -134,7 +136,6 @@ argument to the C<new> method. Note that all the arguments as well
       lc_prefix      => 1,
       initials       => 3,   
       allow_reversed => 1   
-      
    );
    
 
@@ -190,7 +191,7 @@ Valid settings are 1,2 or 3. If no value is supplied a default of 2 is used.
 =item allow_reversed
 
 When this option is set to a positive value, names in reverse order will be
-proceseed. The only valid format is the surname followed by a comma and the
+processed. The only valid format is the surname followed by a comma and the
 rest of the name, which can be in any of the combinations allowed by non
 reversed names. Some examples are:
 
@@ -199,8 +200,8 @@ Jones, Jim
 De Silva, Professor A.B. 
 
 The program change the order of the name back to the non reversed format, and 
-then peforms the normal parsing. Note that if the name can be parsed, the fact
-that it's order was orginally reversed, is not recorded as a property of the
+then performs the normal parsing. Note that if the name can be parsed, the fact
+that it's order was originally reversed, is not recorded as a property of the
 name object.
   
 
@@ -427,7 +428,7 @@ Add regression tests for all combinations of each component
 
 =head1 COPYRIGHT
 
-Copyright (c) 1999-2000 Kim Ryan. All rights reserved.
+Copyright (c) 1999-2001 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it 
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).
@@ -456,7 +457,7 @@ use strict;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.04';
+$VERSION   = '1.05';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -804,7 +805,7 @@ q{
 my $initials_3 = 
 q{ 
    initials: /([A-Z]\. ){1,3}/i |  /([A-Z]\.){1,3} /i | /([A-Z] ){1,3}/i | /([A-Z]){1,3} /i
-};							 
+};                    
 
 my $full_surname = 
 
@@ -870,21 +871,21 @@ q{
 
 my $suffix = 
 q{
-	
-	suffix:
+   
+   suffix:
 
-	   /Sn?r\.? ?/i    |  
-	   /Senior ?/i     |
-	     
-	   /Jn?r\.? ?/i    |
-	   /Junior ?/i     |
+      /Sn?r\.? ?/i    |  
+      /Senior ?/i     |
+        
+      /Jn?r\.? ?/i    |
+      /Junior ?/i     |
 
-	   /VI{1,3} ?/     | # VI,VII,VIII
-	   /IV ?/          |
-	   /V ?/           |
-	   /I{1,3} ?/      | # I,II,III
+      /VI{1,3} ?/     | # VI,VII,VIII
+      /IV ?/          |
+      /V ?/           |
+      /I{1,3} ?/      | # I,II,III
 
-	   /Esq(\.|uire)? ?/i
+      /Esq(\.|uire)? ?/i
 };
 
 
@@ -988,7 +989,7 @@ sub parse
    
    if ( $name->{allow_reversed} and $input_string =~ /,/ )
    {
-   	my ($first,$second) = split(/,/,$input_string);
+      my ($first,$second) = split(/,/,$input_string);
       $input_string = join(' ',$second,$first); 
    }
    
@@ -1069,13 +1070,13 @@ sub case_components
          elsif ( $curr_key eq 'suffix' )          
          {
             # Roman numerals for second, fifth etc
-         	if ( $orig_components{$curr_key} =~ /^[IV]/ )
-         	{
-	            $cased_value = uc($orig_components{$curr_key});
-         	}
+            if ( $orig_components{$curr_key} =~ /^[IV]/ )
+            {
+               $cased_value = uc($orig_components{$curr_key});
+            }
             else
             {
-	            $cased_value = &_case_word($orig_components{$curr_key});
+               $cased_value = &_case_word($orig_components{$curr_key});
             }
          }
          
@@ -1133,7 +1134,7 @@ sub case_all
 
 BEGIN 
 {
-	# Obtain the full path to NameParse module, defined in the %INC hash.
+   # Obtain the full path to NameParse module, defined in the %INC hash.
    my $prefs_file_location = $INC{"Lingua/EN/NameParse.pm"};
    # Now substitute the name of the preferences file
    $prefs_file_location =~ s/NameParse\.pm$/surname_prefs.txt/;
