@@ -26,6 +26,8 @@ Lingua::EN::NameParse - routines for manipulating a person's name
    $surname = $name_comps{surname_1}; # DE SILVA
 
    $correct_casing = $name->case_all; # Mr AC de Silva
+   
+   $correct_casing = $name->case_all_reversed ; # de Silva, AC    
 
    $good_name = &clean("Bad Na9me   "); # "Bad Name"
 
@@ -239,6 +241,18 @@ the component grammar defined within the code.
 
 The method returns the entire cased name as text.
 
+=head2 case_all_reversed
+
+    $correct_casing = $name->case_all_reversed;
+
+The C<case_all_reversed> method applies the same type of casing as
+C<case_all>. However, the name is returned as surname followed by a comma 
+and the rest of the name, which can be any of the combinations allowed 
+for a name, except the title. Some examples are: "Smith, John", "De Silva, A.B."
+This is useful for sorting names alphabetically by surname.
+ 
+The method returns the entire reverse order cased name as text.
+
 
 =head2 case_components
 
@@ -281,11 +295,11 @@ conversion.
    $correct_casing = &case_surname("DE SILVA-MACNAY" [,$lc_prefix]);
 
 C<case_surname> is a stand alone function that does not require a name
-object. The input is a text string and the output is a string converted to
-the correct casing for surnames. An optional argument controls the casing
-rules for prefix portions of a surname, as described above in the C<lc_prefix>
-section.
+object. The input is a text string. An optional input argument controls the 
+casing rules for prefix portions of a surname, as described above in the 
+C<lc_prefix> section.
 
+The output is a string converted to the correct casing for surnames. 
 See C<surname_prefs.txt> for user defined exceptions
 
 This function is useful when you know you are only dealing with names that
@@ -481,32 +495,13 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.14';
+$VERSION   = '1.15';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
 
-#-------------------------------------------------------------------------------
-# Hash of of lists, indicating the order that name components are assembled in.
-# Each list element is itself the name of the key value in a name object.
-# Used by the case_all and salutation methods.
 
-my %component_order=
-(
-   'Mr_A_Smith_&_Ms_B_Jones' => ['title_1','initials_1','surname_1','conjunction_1','title_2','initials_2','surname_2'],
-   'Mr_&_Ms_A_&_B_Smith'     => ['title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2','surname_1'],
-   'Mr_A_&_Ms_B_Smith'       => ['title_1','initials_1','conjunction_1','title_2','initials_2','surname_1'],
-   'Mr_&_Ms_A_Smith'         => ['title_1','conjunction_1','title_2','initials_1','surname_1'],
-   'Mr_A_&_B_Smith'          => ['title_1','initials_1','conjunction_1','initials_2','surname_1'],
-   'Mr_John_A_Smith'         => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
-   'Mr_John_Smith'           => ['precursor','title_1','given_name_1','surname_1','suffix'],
-   'Mr_A_Smith'              => ['precursor','title_1','initials_1','surname_1','suffix'],
-   'John_Adam_Smith'         => ['precursor','title_1','given_name_1','middle_name','surname_1','suffix'],
-   'John_A_Smith'            => ['precursor','given_name_1','initials_1','surname_1','suffix'],
-   'J_Adam_Smith'            => ['precursor','initials_1','given_name_1','surname_1','suffix'],
-   'John_Smith'              => ['precursor','given_name_1','surname_1','suffix'],
-   'A_Smith'                 => ['precursor','initials_1','surname_1','suffix']
-);
+
 #-------------------------------------------------------------------------------
 # Create a new instance of a name parsing object. This step is time consuming
 # and should normally only be called once in your program.
@@ -641,8 +636,46 @@ sub case_components
         return(%cased_components);
     }
 }
+
+#-------------------------------------------------------------------------------
+# Hash of of lists, indicating the order that name components are assembled in.
+# Each list element is itself the name of the key value in a name object.
+# Used by the case_all, case_all_reversed and salutation methods.
+# These hashes are created here globally, ais quite a large overhead is
+# imposed if the are created locally, each time the method is invoked
+
+my %component_order=
+(
+   'Mr_A_Smith_&_Ms_B_Jones' => ['title_1','initials_1','surname_1','conjunction_1','title_2','initials_2','surname_2'],
+   'Mr_&_Ms_A_&_B_Smith'     => ['title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2','surname_1'],
+   'Mr_A_&_Ms_B_Smith'       => ['title_1','initials_1','conjunction_1','title_2','initials_2','surname_1'],
+   'Mr_&_Ms_A_Smith'         => ['title_1','conjunction_1','title_2','initials_1','surname_1'],
+   'Mr_A_&_B_Smith'          => ['title_1','initials_1','conjunction_1','initials_2','surname_1'],
+   'Mr_John_A_Smith'         => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
+   'Mr_John_Smith'           => ['precursor','title_1','given_name_1','surname_1','suffix'],
+   'Mr_A_Smith'              => ['precursor','title_1','initials_1','surname_1','suffix'],
+   'John_Adam_Smith'         => ['precursor','title_1','given_name_1','middle_name','surname_1','suffix'],
+   'John_A_Smith'            => ['precursor','given_name_1','initials_1','surname_1','suffix'],
+   'J_Adam_Smith'            => ['precursor','initials_1','middle_name','surname_1','suffix'],
+   'John_Smith'              => ['precursor','given_name_1','surname_1','suffix'],
+   'A_Smith'                 => ['precursor','initials_1','surname_1','suffix']
+);
+
+my %reverse_component_order=
+(
+   'Mr_John_A_Smith'         => ['surname_1','given_name_1','initials_1','suffix'],
+   'Mr_John_Smith'           => ['surname_1','given_name_1','suffix'],
+   'Mr_A_Smith'              => ['surname_1','initials_1','suffix'],
+   'John_Adam_Smith'         => ['surname_1','given_name_1','middle_name','suffix'],
+   'John_A_Smith'            => ['surname_1','given_name_1','initials_1','suffix'],
+   'J_Adam_Smith'            => ['surname_1','initials_1','middle_name','suffix'],
+   'John_Smith'              => ['surname_1','given_name_1','suffix'],
+   'A_Smith'                 => ['surname_1','initials_1','suffix']
+);
+
 #-------------------------------------------------------------------------------
 # Apply correct capitalisation to a person's entire name
+# Return a string of all cased components in correct order
 
 sub case_all
 {
@@ -655,14 +688,14 @@ sub case_all
       my %component_vals = $name->case_components;
       my @order = @{ $component_order{$name->{properties}{type} } };
 
-      foreach my $component ( @order )
+      foreach my $component_key ( @order )
       {
          # As some components such as precursors are optional, they will appear
          # in the order array but may or may not have have a value, so only
          # process defined values
-         if ( $component_vals{$component} )
+         if ( $component_vals{$component_key} )
          {
-            push(@cased_name,$component_vals{$component});
+            push(@cased_name,$component_vals{$component_key});
          }
       }
    }
@@ -676,6 +709,40 @@ sub case_all
    }
 
    return(join(' ',@cased_name));
+}
+#-------------------------------------------------------------------------------
+# Apply correct capitalisation to a person's entire name !!!
+# Return a string of all cased components in correct order
+
+sub case_all_reversed
+{
+   my $name = shift;
+
+   my @cased_name_reversed;
+
+   unless ( $name->{properties}{type} eq 'unknown'  )
+   {
+      my %component_vals = $name->case_components;
+      my @reverse_order = @{ $reverse_component_order{$name->{properties}{type} } };
+
+      foreach my $component_key ( @reverse_order )
+      {
+         # As some components such as precursors are optional, they will appear
+         # in the order array but may or may not have have a value, so only
+         # process defined values
+         
+         my $component_value = $component_vals{$component_key};
+         if ( $component_value )
+         {
+            if ($component_key eq 'surname_1')
+            {
+                $component_value .= ',';
+            }
+            push(@cased_name_reversed,$component_value);
+         }
+      }
+   }
+   return(join(' ',@cased_name_reversed));
 }
 #-------------------------------------------------------------------------------
 # The user may specify their own preferred spelling for surnames.
@@ -782,6 +849,7 @@ sub case_surname
 }
 #-------------------------------------------------------------------------------
 # Create a personalised greeting from one or two person's names
+# Returns the salutation as a string, such as "Dear Mr Smith"
 
 sub salutation
 {
@@ -855,8 +923,9 @@ sub properties
 # PRIVATE METHODS
 
 #-------------------------------------------------------------------------------
-# Assemble hashes of components and properties as part of the name object
-
+# Initialise all components to empty string. Assemble hashes of components 
+# and properties as part of the name object
+# 
 sub _assemble
 {
    my $name = shift;
@@ -981,11 +1050,15 @@ sub _validate
    {
       $name->{error} = 1;
    }
-
    elsif ( not &_valid_name($name->{components}{given_name_1}) )
    {
       $name->{error} = 1;
    }
+   elsif ( not &_valid_name($name->{components}{middle_name}) )
+   {
+      $name->{error} = 1;
+   }
+   
    elsif ( not &_valid_name($name->{components}{surname_1}) )
    {
       $name->{error} = 1;
@@ -1001,6 +1074,7 @@ sub _validate
 }
 #-------------------------------------------------------------------------------
 # If the name has an assigned value, check that it contains a vowel sound
+# Returns 1 if name is valid, otherwise 0
 
 sub _valid_name
 {

@@ -27,6 +27,8 @@ SYNOPSIS
 
    $correct_casing = $name->case_all; # Mr AC de Silva
 
+   $correct_casing = $name->case_all_reversed ; # de Silva, AC
+
    $good_name = &clean("Bad Na9me   "); # "Bad Name"
 
    $name->salutation; # Dear Mr de Silva

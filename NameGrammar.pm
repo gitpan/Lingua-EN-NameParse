@@ -190,7 +190,7 @@ full_name :
    }
    |
 
-   precursor(?) title(?) given_name given_name surname suffix(?) non_matching(?)
+   precursor(?) title(?) given_name_min_2 middle_name surname suffix(?) non_matching(?)
    {
       $return =
       {
@@ -207,7 +207,7 @@ full_name :
    }
    |
 
-   precursor(?) given_name single_initial surname suffix(?) non_matching(?)
+   precursor(?) given_name_min_2 single_initial surname suffix(?) non_matching(?)
    {
       $return =
       {
@@ -223,13 +223,13 @@ full_name :
    }
    |
    
-   precursor(?) single_initial given_name surname suffix(?) non_matching(?)
+   precursor(?) single_initial middle_name surname suffix(?) non_matching(?)
    {
       $return =
       {
          precursor     => $item[1][0],
          initials_1    => $item[2],
-         given_name_1  => $item[3],
+         middle_name   => $item[3],
          surname_1     => $item[4],
          suffix        => $item[5][0],
          non_matching  => $item[6][0],
@@ -404,12 +404,13 @@ $single_initial = q{ single_initial: /[A-Z]\.? /i };
 # The correct pair of rules is determined by the 'initials' key in the hash
 # passed to the 'new' method.
 
-# John, Jo-Anne, D'Artagnan, O'Shaugnessy La'Keishia
+# Jo, Jo-Anne, D'Artagnan, O'Shaugnessy La'Keishia
 $given_name_min_2 =
 q{
     given_name: /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
 };
 
+# Joe ...
 $given_name_min_3 =
 q{
     given_name: /[A-Z]{3,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
@@ -419,6 +420,13 @@ $given_name_min_4 =
 q{
     given_name: /[A-Z]{4,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{3,} /i
 };
+
+# For use with John_Adam_Smith and John_A_Smith name types
+$fixed_length_given_name =
+q{
+	given_name_min_2 : /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
+};
+
 
 # Define initials combinations specifying the minimum and maximum letters.
 # Order from most complex to simplest,  to avoid premature matching.
@@ -439,8 +447,23 @@ q{
    initials: /([A-Z]\. ){1,3}/i |  /([A-Z]\.){1,3} /i | /([A-Z] ){1,3}/i | /([A-Z]){1,3} /i
 };
 
-$full_surname =
 
+# Jo, Jo-Anne, La'Keishia, D'Artagnan, O'Shaugnessy 
+$middle_name =
+q{
+   middle_name: 
+   
+   # Dont grab surname prefix to ealry. For example, John Van Dam could be
+   # interpeted as middle name of Van and Surname of Dam. SO exclude prefixs
+   # from middle names
+   ...!prefix /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
+   {
+      $return = $item[2];
+   }
+};
+
+
+$full_surname =
 q{
    # Use look-ahead to avoid ambiguity between surname and suffix. For example,
    # John Smith Snr, would detect Snr as the surname and Smith as the middle name
@@ -448,11 +471,11 @@ q{
    {
       if ( $item[2] and $item[3][0] )
       {
-         $return = "$item[2]$item[3][0]"
+         $return = "$item[2]$item[3][0]";
       }
       else
       {
-         $return = "$item[2]"
+         $return = $item[2];
       }
    }
 
@@ -474,7 +497,7 @@ q{
    {
       if ( $item[1] and $item[2] )
       {
-         $return = "$item[1]$item[2]"
+         $return = "$item[1]$item[2]";
       }
    }
 
@@ -485,7 +508,8 @@ q{
       /Ap /i             |   # Welsh
       /Ben /i            |   # Hebrew
 
-      /Dell([a|e|'])? /i |   # ITALIAN
+      /Dell([a|e])? /i   |   # ITALIAN
+      /Dell'/i           |
       /Del /i            |
       /De (La |Los )?/i  |
       /D[a|i|u] /i       |
@@ -545,7 +569,7 @@ sub create
    $name->{initials} < 1 and $name->{initials} = 1;
 
    # Define limit of when a string is treated as an initial, or
-   # a first name. For example, if initials are set to 2, MR TO SMITH
+   # a given name. For example, if initials are set to 2, MR TO SMITH
    # will have initials of T & O and no given name, but MR TOM SMITH will
    # have no initials, and a given name of Tom.
 
@@ -564,11 +588,11 @@ sub create
       $grammar .= $given_name_min_4;
       $grammar .= $initials_3;
    }
-
+   
+   $grammar .= $fixed_length_given_name;
+   $grammar .= $middle_name;
    $grammar .= $full_surname;
-
    $grammar .= $suffix;
-
    $grammar .= $non_matching;
 
    return($grammar);
