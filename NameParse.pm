@@ -96,14 +96,16 @@ of the name is used. The following formats are currently supported :
    Mr_A_&_Ms_B_Smith
    Mr_&_Ms_A_Smith
    Mr_A_&_B_Smith
+   Mr_John_A_Smith
    Mr_John_Smith
    Mr_A_Smith
+   John_A_Smith
    John_Smith
    A_Smith
 
 
-Precursors are only applied to the 'Mr_John_Smith', 'Mr_A_Smith' 
-'John_Smith' and 'A_Smith' formats
+Precursors are only applied to the 'Mr_John_A_Smith','Mr_John_Smith', 
+'Mr_A_Smith', 'Mr_John_Smith', 'John_Smith' and 'A_Smith' formats
 
 =head1 METHODS
 
@@ -173,7 +175,7 @@ or Ms AS von der Heiden.
 
 =head3 initials
 
-Allows the user to cintrol the number of letters that can occur in initial.
+Allows the user to control the number of letters that can occur in the initials.
 Valid settings are 1,2 or 3. If no value is supplied a default of 2 is used.  
   
 
@@ -289,8 +291,10 @@ The type of format a name is in, as one of the following strings:
    Mr_A_&_Ms_B_Smith
    Mr_&_Ms_A_Smith
    Mr_A_&_B_Smith
+   Mr_John_A_Smith
    Mr_John_Smith
    Mr_A_Smith
+   John_A_Smith
    John_Smith
    A_Smith
    unknown
@@ -348,7 +352,6 @@ Data Dictionary for transfer of street addressing information"
 
 =head1 FUTURE DIRECTIONS
 
-   Add more formats (John_A_Smith...)
    Allow for a user defined file of local spellings, like duPont, MacHado etc
    Add filtering of very long names
    Add diagnostic messages explaining why parsing failed
@@ -397,9 +400,11 @@ Add regression tests for all combinations of each component
                   
                   If a parsed name had no components, the components method
                   returned an odd numbered hash and case_componets returned 1.
-                  Both these methods now return undef in this situation.                 
+                  Both these methods now return undef in this situation.
                   
-
+0.40 14 Sep 1999: Added the Mr_John_A_Smith and John_A_Smith name types
+                  Allowed for hyphenated given names 
+                  
 =head1 COPYRIGHT
 
 Copyright (c) 1999 Kim Ryan. All rights reserved.
@@ -432,7 +437,7 @@ use strict;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '0.30';
+$VERSION   = '0.40';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -550,6 +555,22 @@ full_name :
    }
    |
 
+   precursor(?) title given_name middle_initial surname non_matching(?)
+   {
+      $return =
+      {
+         precursor     => $item[1][0],
+         title_1       => $item[2],
+         given_name_1  => $item[3],
+         initials_1    => $item[4],
+         surname_1     => $item[5],
+         non_matching  => $item[6][0],
+         number        => 1,
+         type          => 'Mr_John_A_Smith'
+      }
+   }
+   |
+   
    precursor(?) title given_name surname non_matching(?)
    {
       $return =
@@ -580,21 +601,35 @@ full_name :
    }
    |
    
-    precursor(?) given_name surname non_matching(?)
-    {
-       $return =
-       {
-          precursor     => $item[1][0],
-          given_name_1  => $item[2],
-          surname_1     => $item[3],
-          non_matching  => $item[4][0],
-          number        => 1,
-          type          => 'John_Smith'
-       }
-    }
-    |
+   precursor(?) given_name middle_initial surname non_matching(?)
+   {
+      $return =
+      {
+         precursor     => $item[1][0],
+         given_name_1  => $item[2],
+         initials_1    => $item[3],
+         surname_1     => $item[4],
+         non_matching  => $item[5][0],
+         number        => 1,
+         type          => 'John_A_Smith'
+      }
+   }
+   |
    
-
+   precursor(?) given_name surname non_matching(?)
+   {
+      $return =
+      {
+         precursor     => $item[1][0],
+         given_name_1  => $item[2],
+         surname_1     => $item[3],
+         non_matching  => $item[4][0],
+         number        => 1,
+         type          => 'John_Smith'
+      }
+   }
+   |
+   
    precursor(?) initials surname non_matching(?)
    {
       $return =
@@ -714,18 +749,24 @@ title :
 
 my $conjunction = q{ conjunction : /And |& /i };
 
+# Used in the John_A_Smith name type. Although this duplicates 
+# $initials_1, it is needed because the middle initial must alway be
+# one character long, regardless of the length of initials set by the
+# user in the 'new' method. 
+my $middle_initial = q{ middle_initial: /[A-Z]\.? /i };
+
 # Define given name and initials combinations, specifying the minimum
 # and maximum (for initials) letters. The correct pair of rules is
 # determined by the 'initials' key in the hash passed to the 'new' method.
 
-my $given_name_min_2 = q{ given_name: /[A-Z]{2,} /i };
+my $given_name_min_2 = q{ given_name: /[A-Z]{2,}(\-[A-Z]{2,})? /i };
  
-my $given_name_min_3 = q{ given_name: /[A-Z]{3,} /i };
+my $given_name_min_3 = q{ given_name: /[A-Z]{3,}(\-[A-Z]{2,})? /i };
  
-my $given_name_min_4 = q{ given_name: /[A-Z]{4,} /i };
+my $given_name_min_4 = q{ given_name: /[A-Z]{4,}(\-[A-Z]{2,})? /i };
 
 
-my $initials_1 = q{ initials: /([A-Z]\.? ) /i };
+my $initials_1 = q{ initials: /[A-Z]\.? /i };
 
 my $initials_2 = 
 q{ 
@@ -776,22 +817,21 @@ q{
    # Patronymic, place name and other surname prefixes
    prefix:
 
-      /[A|E]l /i      |      # Arabic, Greek, 
-      /Ap /i          |      # Welsh
-      /Ben /i         |      # Hebrew
-
+      /[A|E]l /i         |   # Arabic, Greek, 
+      /Ap /i             |   # Welsh
+      /Ben /i            |   # Hebrew
 
       /Dell([a|e|'])? /i |   # ITALIAN
-      /Del /i         |      
-      /De (La )?/i    |      
-      /D[a|i|u] /i    |
-      /L[a|e|o] /i    |      
+      /Del /i            |      
+      /De (La |Los )?/i  |      
+      /D[a|i|u] /i       |
+      /L[a|e|o] /i       |      
 
-      /[D|L|O]'/i     |      # Italian, Irish or French
-      /St\.? /i       |      # abbrevation for Saint
+      /[D|L|O]'/i        |   # Italian, Irish or French
+      /St\.? /i          |   # abbrevation for Saint
 
-      /Den /i         |      # DUTCH
-      /Von (Der )?/i  |  
+      /Den /i            |   # DUTCH
+      /Von (Der )?/i     |  
       /Van (De(n|r)? )?/i
 
       
@@ -812,8 +852,10 @@ my %component_order=
    'Mr_A_&_Ms_B_Smith'   => ['title_1','initials_1','conjunction_1','title_2','initials_2','surname_1'],
    'Mr_&_Ms_A_Smith'     => ['title_1','conjunction_1','title_2','initials_1','surname_1'],
    'Mr_A_&_B_Smith'      => ['title_1','initials_1','conjunction_1','initials_2','surname_1'],
+   'Mr_John_A_Smith'     => ['precursor','title_1','given_name_1','initials_1','surname_1'],
    'Mr_John_Smith'       => ['precursor','title_1','given_name_1','surname_1'],
    'Mr_A_Smith'          => ['precursor','title_1','initials_1','surname_1'],
+   'John_A_Smith'        => ['precursor','given_name_1','initials_1','surname_1'],
    'John_Smith'          => ['precursor','given_name_1','surname_1'],
    'A_Smith'             => ['precursor','initials_1','surname_1']
 );
@@ -845,11 +887,19 @@ sub new
          $name->{$curr_key} = $args{$curr_key};
       }
    }
+
+   my $grammar = $rules . $precursor . $title . $conjunction;
+   
+   $grammar	.= $middle_initial;
    
    $name->{initials} > 3 and $name->{initials} = 3;
    $name->{initials} < 1 and $name->{initials} = 1;
-
-   my $grammar = $rules . $precursor . $title . $conjunction;
+   
+   # Define limit of when a string is treated as an initial, or
+   # a first name. Fo example, if initials are set to 2, MR TO SMITH
+   # will have initials of T & O and no given anme, but MR TOM SMITH will 
+   # have no initials, and a given name of Tom.
+   
    if ( $name->{initials} == 1 )
    {
       $grammar	.= $given_name_min_2 . $initials_1;

@@ -100,9 +100,10 @@ Perl, version 5.001 or higher and Parse::RecDescent
                   If a parsed name had no components, the components method
                   returned an odd numbered hash and case_componets returned 1.
                   Both these methods now return undef in this situation                 
-
-
-
+                  
+0.40 14 Sep 1999: Added the Mr_John_A_Smith and John_A_Smith name types
+                  Allowed for hyphenated given names 
+                  
 =head1 AUTHOR
 
 NameParse was written by Kim Ryan <kimaryan@ozemail.com.au>.

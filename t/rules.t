@@ -10,7 +10,7 @@ use Lingua::EN::NameParse;
 
 # We start with some black magic to print on failure.
 
-BEGIN { print "1..9\n"; }
+BEGIN { print "1..11\n"; }
 
 my $name = new Lingua::EN::NameParse; 
 my ($input,%props);
@@ -42,25 +42,34 @@ $name->parse($input);
 %props = $name->properties;
 print $props{type} eq 'Mr_A_&_B_Smith' ? "ok 5\n" : "not ok 5\n"; 
 
+$input = "MR JOHN F KENNEDY";
+$name->parse($input);
+%props = $name->properties;
+print $props{type} eq 'Mr_John_A_Smith' ? "ok 6\n" : "not ok 6\n"; 
+
 $input = "MR TOM JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_John_Smith' ? "ok 6\n" : "not ok 6\n"; 
+print $props{type} eq 'Mr_John_Smith' ? "ok 7\n" : "not ok 7\n"; 
 
 $input = "MR AB JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_A_Smith' ? "ok 7\n" : "not ok 7\n"; 
+print $props{type} eq 'Mr_A_Smith' ? "ok 8\n" : "not ok 8\n"; 
+
+$input = "JOHN F KENNEDY";
+$name->parse($input);
+%props = $name->properties;
+print $props{type} eq 'John_A_Smith' ? "ok 9\n" : "not ok 9\n"; 
 
 $input = "TOM JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'John_Smith' ? "ok 8\n" : "not ok 8\n"; 
-
+print $props{type} eq 'John_Smith' ? "ok 10\n" : "not ok 10\n"; 
 
 $input = "AB JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'A_Smith' ? "ok 9\n" : "not ok 9\n"; 
+print $props{type} eq 'A_Smith' ? "ok 11\n" : "not ok 11\n"; 
    
    
