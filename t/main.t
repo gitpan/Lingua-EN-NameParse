@@ -1,8 +1,8 @@
 #------------------------------------------------------------------------------
-# Test script for Lingua::EN::NameParse.pm 
-#                                            
-# Author: Kim Ryan (kimaryan@ozemail.com.au) 
-# Date  : 1 May 1999                         
+# Test script for Lingua::EN::NameParse.pm
+#
+# Author: Kim Ryan (kimaryan@ozemail.com.au)
+# Date  : 1 May 1999
 #------------------------------------------------------------------------------
 
 use strict;
@@ -20,18 +20,18 @@ my $input;
 $input = "BIG BROTHER & THE HOLDING COMPANY";
 print &case_surname($input) eq 'Big Brother & The Holding Company'
   ? "ok 1\n" : "not ok 1\n";
-  
-my %args = 
+
+my %args =
 (
   salutation     => 'Dear',
   sal_default    => 'Friend',
   auto_clean     => 1,
   force_case     => 1,
   initials       => 3,
-  allow_reversed => 1  
+  allow_reversed => 1
 );
 
-my $name = new Lingua::EN::NameParse(%args); 
+my $name = new Lingua::EN::NameParse(%args);
 
 # Test captialization of Mac prefix exceptions
 $input = "MR AB MACHLIN";
@@ -58,17 +58,17 @@ print $name->salutation eq 'Dear Friend' ? "ok 5\n" : "not ok 5\n";
 $input = "Estate Of The Late Lieutenant Colonel AB Van Der Heiden Jnr";
 $name->parse($input);
 my %comps = $name->case_components;
-if ( $comps{precursor} eq 'Estate Of The Late' and 
-   $comps{title_1} eq 'Lieutenant Colonel' and 
+if ( $comps{precursor} eq 'Estate Of The Late' and
+   $comps{title_1} eq 'Lieutenant Colonel' and
    $comps{initials_1} eq 'AB' and
    $comps{surname_1} eq 'Van Der Heiden' and
-   $comps{suffix} eq 'Jnr' ) 
+   $comps{suffix} eq 'Jnr' )
 {
-   print "ok 6\n";   
+   print "ok 6\n";
 }
 else
 {
-   print "not ok 6\n";  
+   print "not ok 6\n";
 }
 
 # Test properties
@@ -84,12 +84,12 @@ else
 	print "not ok 7\n";
 }
 
-# Test non matching 
+# Test non matching
 $input = "Prof A Brain & Associates";
 $name->parse($input);
 %props = $name->properties;
 print $props{non_matching} eq '& Associates' ? "ok 8\n" : "not ok 8\n";
-      
+
 # Test cleaning
 $input = '   Bad Na89me!';
 print &clean($input) eq 'Bad Name' ? "ok 9\n" : "not ok 9\n";

@@ -1,21 +1,25 @@
 =head1 NAME
 
-Lingua::EN::NameGrammar 
+Lingua::EN::NameGrammar - grammar tree for Lingua::EN::NameParse
+
+=head1 SYNOPSIS
+
+Internal functions called from NameParse.pm module
 
 =head1 DESCRIPTION
 
-Grammar tree of personal name syntax for Lingua::EN::NameParse module. 
+Grammar tree of personal name syntax for Lingua::EN::NameParse module.
 
-The grammar defined here is for use with the Parse::RecDescent module. 
+The grammar defined here is for use with the Parse::RecDescent module.
 Note that parsing is done depth first, meaning match the shortest string first.
-To avoid premature matches, when one rule is a sub set of another longer rule, 
+To avoid premature matches, when one rule is a sub set of another longer rule,
 it must appear after the longer rule. See the Parse::RecDescent documentation
 for more details.
 
 =head1 COPYRIGHT
 
 Copyright (c) 1999-2001 Kim Ryan. All rights reserved.
-This program is free software; you can redistribute it 
+This program is free software; you can redistribute it
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).
 
@@ -32,14 +36,14 @@ package Lingua::EN::NameGrammar;
 
 # Rules that define valid orderings of a names components
 
-$rules = 
+$rules =
 q{
-   
+
 full_name :
 
    # A (?) refers to an optional component, occurring 0 or more times.
    # Optional items are returned as an array, which for our case will
-   # always consist of one element, when they exist. 
+   # always consist of one element, when they exist.
 
    title initials surname conjunction title initials surname non_matching(?)
    {
@@ -67,7 +71,7 @@ full_name :
 
    title initials conjunction initials surname non_matching(?)
    {
-      # Two related people, shared title, separate initials, 
+      # Two related people, shared title, separate initials,
       # shared surname. Example, father and son, sisters
       $return =
       {
@@ -151,7 +155,7 @@ full_name :
       }
    }
    |
-   
+
    title given_name middle_initial surname non_matching(?)
    {
       $return =
@@ -166,7 +170,7 @@ full_name :
       }
    }
    |
-   
+
    title given_name surname non_matching(?)
    {
       $return =
@@ -180,7 +184,7 @@ full_name :
       }
    }
    |
-     
+
    title initials surname non_matching(?)
    {
       $return =
@@ -190,11 +194,11 @@ full_name :
          surname_1     => $item[3],
          non_matching  => $item[4][0],
          number        => 1,
-         type          => 'Mr_A_Smith'  
+         type          => 'Mr_A_Smith'
       }
    }
    |
-   
+
    given_name middle_initial surname non_matching(?)
    {
       $return =
@@ -208,7 +212,7 @@ full_name :
       }
    }
    |
-   
+
    given_name surname non_matching(?)
    {
       $return =
@@ -221,7 +225,7 @@ full_name :
       }
    }
    |
-   
+
    initials surname non_matching(?)
    {
       $return =
@@ -234,7 +238,7 @@ full_name :
       }
    }
    |
-    
+
    non_matching(?)
    {
       $return =
@@ -247,12 +251,12 @@ full_name :
 };
 
 #------------------------------------------------------------------------------
-# Individual components that a name can be composed from. Components are 
+# Individual components that a name can be composed from. Components are
 # expressed as literals or Perl regular expressions.
 
-$title = 
+$title =
 q{
-   
+
    title :
 
    /Mrs\.? /i          |
@@ -264,7 +268,7 @@ q{
    /Mr\.? /i           |
    /Messrs /i          |   # plural or Mr
    /Mister /i          |
-   /Mast(\.|er)? /i    |    
+   /Mast(\.|er)? /i    |
    /Ms?gr\.? /i        |   # Monsignor
 
    /Sir /i             |
@@ -278,89 +282,94 @@ q{
    /Doctor /i          |
    /Sister /i          |
    /Matron /i          |
-   
+
    # Legal
-   /Judge /i           |   
-   /Justice /i         |   
+   /Judge /i           |
+   /Justice /i         |
 
    # Police
-   /Det\.? /i          |      
+   /Det\.? /i          |
    /Insp\.? /i         |
 
    # Military
-   /Brig(adier)? /i              |
-   /Capt(\.|ain)? /i             |      
-   /Cdr\.? /i                    |   # Commander, Commodore
-   /Gen(\.|eral)? /i             | 
-   /Field Marshall /i            |
-   /Fl\.? Off\.? /i              | 
-   /Flight Officer /i            |
-   /Flt Lt /i                    | 
-   /Flight Lieutenant /i         |
-   /Pte\. /i                     | 
-   /Private /i                   |
-   /Sgt\.? /i                    |
-   /Sargent /i                   |
-   /(Air )?Commander /i          |
-   /(Air )?Commodore /i          |
-   /(Air )?Marshall /i           |
-   /Lieutenant (Colonel )?/i     |
-   /Lt\.? Col\.? /i              | 
-   /Lt\.? Gen\.? /i              | 
-   /Lt\.? Cdr\.? /i              | 
-   /(Lt|Leut|Lieut)\.? /i        |
-   /Colonel /i                   |
-   /Major General /i             |
-   /Maj\.? Gen\.?/i              | 
-   /Major /i                     |
-   /Maj\.? /i                    | 
+   /Brig(adier)? /i          |
+   /Capt(\.|ain)? /i         |
+   /Commander /i             |
+   /Commodore /i             |
+   /Cdr\.? /i                |   # Commander, Commodore
+   /Colonel /i               |
+   /Gen(\.|eral)? /i         |
+   /Field Marshall /i        |
+   /Fl\.? Off\.? /i          |
+   /Flight Officer /i        |
+   /Flt Lt /i                |
+   /Flight Lieutenant /i     |
+   /Pte\. /i                 |
+   /Private /i               |
+   /Sgt\.? /i                |
+   /Sargent /i               |
+   /Air Commander /i         |
+   /Air Commodore /i         |
+   /Air Marshall /i          |
+   /Lieutenant Colonel /i    |
+   /Lt\.? Col\.? /i          |
+   /Lt\.? Gen\.? /i          |
+   /Lt\.? Cdr\.? /i          |
+   /Lieutenant /i            |
+   /(Lt|Leut|Lieut)\.? /i    |
+   /Marshall /i              |
+   /Major General /i         |
+   /Maj\.? Gen\.?/i          |
+   /Major /i                 |
+   /Maj\.? /i                |
 
    # Religious
-   /Rabbi /i                     |   
-   /Brother /i                   |
-   /Father /i                    |
-   /Chaplain /i                  |
-   /Pastor /i                    |
-   /Bishop /i                    |
-   /Mother (Superior )?/i        |
-   /Most Rever[e|a]nd /i         |
-   /Very Rever[e|a]nd /i         |
-   /Mt\.? Revd\.? /i             |  
-   /V\.? Revd?\.? /i             |  
-   /Rever[e|a]nd /i              |
-   /Revd?\.? /i                  |  
-   
+   /Rabbi /i                 |
+   /Brother /i               |
+   /Father /i                |
+   /Chaplain /i              |
+   /Pastor /i                |
+   /Bishop /i                |
+   /Mother Superior /i       |
+   /Mother /i                |
+   /Most Rever[e|a]nd /i     |
+   /Very Rever[e|a]nd /i     |
+   /Mt\.? Revd\.? /i         |
+   /V\.? Revd?\.? /i         |
+   /Rever[e|a]nd /i          |
+   /Revd?\.? /i              |
+
    # Other
    /Prof(\.|essor)? /i |
    /Ald(\.|erman)? /i
-   
+
 };
 
 $conjunction = q{ conjunction : /And |& /i };
 
-# Used in the John_A_Smith name type. Although this duplicates 
+# Used in the John_A_Smith name type. Although this duplicates
 # $initials_1, it is needed because the middle initial must always be
 # one character long, regardless of the length of initials set by the
-# user in the 'new' method. 
+# user in the 'new' method.
 $middle_initial = q{ middle_initial: /[A-Z]\.? /i };
 
 # Define given name combinations, specifying the minimum number of letters.
-# The correct pair of rules is determined by the 'initials' key in the hash 
+# The correct pair of rules is determined by the 'initials' key in the hash
 # passed to the 'new' method.
 
 # John, Jo-Anne, D'Artagnan, O'Shaugnessy La'Keishia
-$given_name_min_2 = 
-q{ 
-	given_name: /[A-Z]{2,}(\-[A-Z]{2,})? /i | /[A-Z]{1,}\'[A-Z]{2,} /i 
+$given_name_min_2 =
+q{
+	given_name: /[A-Z]{2,}(\-[A-Z]{2,})? /i | /[A-Z]{1,}\'[A-Z]{2,} /i
 };
- 
-$given_name_min_3 = 
-q{ 
+
+$given_name_min_3 =
+q{
 	given_name: /[A-Z]{3,}(\-[A-Z]{2,})? /i | /[A-Z]{1,}\'[A-Z]{2,} /i
 };
- 
-$given_name_min_4 = 
-q{ 
+
+$given_name_min_4 =
+q{
 	given_name: /[A-Z]{4,}(\-[A-Z]{2,})? /i | /[A-Z]{1,}\'[A-Z]{3,} /i
 };
 
@@ -368,21 +377,22 @@ q{
 # Order from most complex to simplest,	to avoid premature matching.
 
 # 'A' 'A.'
-$initials_1 = q{ initials: /[A-Z]\.? /i }; 
+$initials_1 = q{ initials: /[A-Z]\.? /i };
 
 # 'A. B.' 'A.B.' 'AB' 'A B'
-$initials_2 =  
-q{ 
+
+$initials_2 =
+q{
    initials:  /([A-Z]\. ){1,2}/i | /([A-Z]\.){1,2} /i | /([A-Z] ){1,2}/i | /([A-Z]){1,2} /i
 };
 
-# 'A. B. C. '  'A.B.C' 'ABC' 'A B C'  
-$initials_3 = 
-q{ 
+# 'A. B. C. '  'A.B.C' 'ABC' 'A B C'
+$initials_3 =
+q{
    initials: /([A-Z]\. ){1,3}/i |  /([A-Z]\.){1,3} /i | /([A-Z] ){1,3}/i | /([A-Z]){1,3} /i
-};                    
+};
 
-$full_surname = 
+$full_surname =
 
 q{
    surname : sub_surname second_name(?)
@@ -393,7 +403,7 @@ q{
       }
       else
       {
-         $return = "$item[1]" 
+         $return = "$item[1]"
       }
    }
 
@@ -422,24 +432,24 @@ q{
    # Patronymic, place name and other surname prefixes
    prefix:
 
-      /[A|E]l /i         |   # Arabic, Greek, 
+      /[A|E]l /i         |   # Arabic, Greek,
       /Ap /i             |   # Welsh
       /Ben /i            |   # Hebrew
 
       /Dell([a|e|'])? /i |   # ITALIAN
-      /Del /i            |      
-      /De (La |Los )?/i  |      
+      /Del /i            |
+      /De (La |Los )?/i  |
       /D[a|i|u] /i       |
-      /L[a|e|o] /i       |      
+      /L[a|e|o] /i       |
 
       /[D|L|O]'/i        |   # Italian, Irish or French
       /St\.? /i          |   # abbreviation for Saint
 
       /Den /i            |   # DUTCH
-      /Von (Der )?/i     |  
+      /Von (Der )?/i     |
       /Van (De(n|r)? )?/i
 
-	# Space needed for any following text        
+	# Space needed for any following text
    name: /[A-Z]{2,} ?/i
 };
 
@@ -453,17 +463,17 @@ sub create
    my $name = shift;
 
    my $grammar = $rules . $title . $conjunction;
-   
+
    $grammar .= $middle_initial;
-   
+
    $name->{initials} > 3 and $name->{initials} = 3;
    $name->{initials} < 1 and $name->{initials} = 1;
-   
+
    # Define limit of when a string is treated as an initial, or
    # a first name. For example, if initials are set to 2, MR TO SMITH
-   # will have initials of T & O and no given name, but MR TOM SMITH will 
+   # will have initials of T & O and no given name, but MR TOM SMITH will
    # have no initials, and a given name of Tom.
-   
+
    if ( $name->{initials} == 1 )
    {
       $grammar .= $given_name_min_2;
@@ -479,11 +489,11 @@ sub create
       $grammar .= $given_name_min_4;
       $grammar .= $initials_3;
    }
-   
+
    $grammar .= $full_surname;
-   
+
    $grammar .= $non_matching;
-   
+
    return($grammar);
 }
 #-------------------------------------------------------------------------------

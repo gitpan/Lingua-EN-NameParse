@@ -2,73 +2,89 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
 
-1.12  4 Apr 2001: Allowed for titles in John_Adam_Smith name type (they were
-                    being consumed to early as given names).
-                  Fixed some incorrect title regualar expressions
+1.13 25 Apr 2001:
 
-1.11 24 Feb 2001: Fixed bug in Makefile.PL, caused by omission of NameGrammar.pm
+    Initialised values for all parsed name components to empty string
+    Fixed POD errors, thanks to Jason Gallagher
 
-1.10 22 Feb 2001: Allowed for apostrophes in given names, like D'Artagnan
-                  Fixed bug for suffixes in 'John_Smith' name type
-                  Added the John_Adam_Smith name type
-                  Thanks to 560@altavista.net for bug reports and suggestions
+1.12  4 Apr 2001:
+    Allowed for titles in John_Adam_Smith name type (they were  being consumed to early as given names).
+    Fixed some incorrect title regular expressions
 
-                  Added correct captilasation of possesive proper names such as
-                    Australia's to case_surname. Thanks to Dennis Ingram.
+1.11 24 Feb 2001:
+    Fixed bug in Makefile.PL, caused by omission of NameGrammar.pm
 
-                  Precursors and suffixes now detected in pre-parsing stage
-                  Removed precursor and suffix tree from grammar
-                  Removed Senior and Junior as suffixes, as they are valid surnames
-                  Extended range of suffixes in roman numeral format
-                  Moved grammar defintion to seperate module
+1.10 22 Feb 2001:
+    Allowed for apostrophes in given names, like D'Artagnan
+    Fixed bug for suffixes in 'John_Smith' name type
+    Added the John_Adam_Smith name type
+    Thanks to 560@altavista.net for above bug reports and suggestions
 
-1.05  7 Jan 2001: Updated README file
-                  Added test of lower casing prefixes to rules.t
+    Added correct capitalization of possessive proper names such as 
+      Australia's to case_surname. Thanks to Dennis Ingram.
 
-1.04 10 Dec 2000: Allowed for reversed order names where the surname appears
-                  first, followed by a comma and the remaining components of 
-                  the name, such as title, first name, initials etc.
+    Precursors and suffixes now detected in pre-parsing stage
+    Removed precursor and suffix tree from grammar
+    Removed Senior and Junior as suffixes, as they are valid surnames
+    Extended range of suffixes in roman numeral format
+    Moved grammar definition to separate module
 
-1.03 25 Jul 2000: Added suffixes (like Jnr) to most single names 
-                  Replaced '=head3' because they don't work with perldoc
-                  Removed search of @INC array in BEGIN subroutine 
-                  Thanks to Douglas Wilson for these requests
+1.05  7 Jan 2001:
+    Updated README file
+    Added test of lower casing prefixes to rules.t
 
-1.02 19 Apr 2000: Removed title J\.? (abbreviation for Judge) as it clashed 
-                  with names such as J A Smith, J. B. Jones etc. Thanks to 
-                  Adam Huffman for spotting this bug
+1.04 10 Dec 2000:
+    Allowed for reversed order names where the surname appears first, followed
+      by a comma and the remaining components of  the name, such as title, 
+      first name, initials etc.
 
-1.01 15 Apr 2000: auto_clean option now removes commas from input
-                  Improved regular expressions in 'clean' sub, thanks to 
-                  Mark Summerfield
+1.03 25 Jul 2000:
+     Added suffixes (like Jnr) to most single names 
+     Replaced '=head3' because they don't work with perldoc
+     Removed search of @INC array in BEGIN subroutine 
+     Thanks to Douglas Wilson for these requests
 
-                  Catered for initials with both dots and spaces, such as 
-                  A. B. Smith, requested by Adam Huffman
+1.02 19 Apr 2000:
+     Removed title J\.? (abbreviation for Judge) as it clashed  with names such
+       as J A Smith, J. B. Jones etc. Thanks to  Adam Huffman for spotting this bug
 
-1.00 27 Dec 1999: Added user defined file of surname capitalisation over rides
-                  Allowed for salutations where precursor is not an estate
+1.01 15 Apr 2000:
+     auto_clean option now removes commas from input
+     Improved regular expressions in 'clean' sub, thanks to Mark Summerfield
 
-0.40 14 Sep 1999: Added the Mr_John_A_Smith and John_A_Smith name types
-                  Allowed for hyphenated given names 
+     Catered for initials with both dots and spaces, such as A. B. Smith, requested by Adam Huffman
 
-0.30 21 Aug 1999: Allowed for user defined length of initials
-                  Added the Mr_John_Smith name type
-                  Added the John_Smith name type
-                  Surnames with the D' prefix now correctly capitalised
-                  
-                  If a parsed name had no components, the components method
-                  returned an odd numbered hash and case_components returned 1.
-                  Both these methods now return undef in this situation                 
+1.00 27 Dec 1999:
+     Added user defined file of surname capitalization over rides
+     Allowed for salutations where precursor is not an estate
 
-0.10 04 Jul 1999: Allowed for lower casing of surname prefixes
+0.40 14 Sep 1999:
+     Added the Mr_John_A_Smith and John_A_Smith name types
+     Allowed for hyphenated given names 
 
-0.04 16 May 1999: Added test script for rule ordering
-                  Added more titles, improved documentation
+0.30 21 Aug 1999:
+     Allowed for user defined length of initials
+     Added the Mr_John_Smith name type
+     Added the John_Smith name type
+     Surnames with the D' prefix now correctly capitalised
+     
+     If a parsed name had no components, the components method returned an odd
+     numbered hash and case_components returned 1. Both these methods now return
+     undef in this situation                 
 
-0.03 02 May 1999: Altered output of test script to work with Test::Harness
-                  Modified &clean to remove single leading or trailing space
+0.10 04 Jul 1999:
+     Allowed for lower casing of surname prefixes
 
-0.02 01 May 1999: Added test script, converted source to Unix format
+0.04 16 May 1999:
+     Added test script for rule ordering
+     Added more titles, improved documentation
+
+0.03 02 May 1999:
+    Altered output of test script to work with Test::Harness
+    Modified &clean to remove single leading or trailing space
+
+0.02 01 May 1999:
+    Added test script, converted source to Unix format
 
 0.01 25 Apr 1999: First Release
 

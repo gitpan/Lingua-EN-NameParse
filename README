@@ -7,18 +7,18 @@ Lingua::EN::NameParse - routines for manipulating a persons name
    use Lingua::EN::NameParse qw(clean case_surname);
 
    # optional configuration arguments
-   my %args = 
+   my %args =
    (
       salutation     => 'Dear',
       sal_default    => 'Friend',
       auto_clean     => 1,
       force_case     => 1,
       lc_prefix      => 1,
-      initials       => 3,   
-      allow_reversed => 1   
+      initials       => 3,
+      allow_reversed => 1
    );
 
-   my $name = new Lingua::EN::NameParse(%args); 
+   my $name = new Lingua::EN::NameParse(%args);
 
    $error = $name->parse("MR AC DE SILVA");
 
@@ -41,7 +41,7 @@ Lingua::EN::NameParse - routines for manipulating a persons name
 
 =head1 DESCRIPTION
 
-This module takes as input a person or persons name in 
+This module takes as input a person or persons name in
 free format text such as,
 
     Mr AB & M/s CD MacNay-Smith
@@ -57,7 +57,7 @@ down into components and useful functions can be performed like :
 - determining the type of format the name is in      (Mr_A_Smith     )
 
 If the name cannot be parsed you have the option of cleaning the name
-of bad characters, or extracting any portion that was parsed and the 
+of bad characters, or extracting any portion that was parsed and the
 portion that failed.
 
 This module can be used for analysing and improving the quality of
@@ -75,15 +75,15 @@ Perl, version 5.001 or higher and Parse::RecDescent
     make test
     make install
 
-                  
+
 =head1 AUTHOR
 
 NameParse was written by Kim Ryan <kimaryan@ozemail.com.au>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1999,2001 Kim Ryan. All rights reserved.
-This program is free software; you can redistribute it 
+Copyright (c) 1999-2001 Kim Ryan. All rights reserved.
+This program is free software; you can redistribute it
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).
 
