@@ -2,6 +2,12 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
 
+1.12  4 Apr 2001: Allowed for titles in John_Adam_Smith name type (they were
+                    being consumed to early as given names).
+                  Fixed some incorrect title regualar expressions
+
+1.11 24 Feb 2001: Fixed bug in Makefile.PL, caused by omission of NameGrammar.pm
+
 1.10 22 Feb 2001: Allowed for apostrophes in given names, like D'Artagnan
                   Fixed bug for suffixes in 'John_Smith' name type
                   Added the John_Adam_Smith name type
@@ -13,7 +19,7 @@ Revision history for Perl CPAN module Lingua::En::NameParse
                   Precursors and suffixes now detected in pre-parsing stage
                   Removed precursor and suffix tree from grammar
                   Removed Senior and Junior as suffixes, as they are valid surnames
-				  Extended range of suffixes in roman numeral format
+                  Extended range of suffixes in roman numeral format
                   Moved grammar defintion to seperate module
 
 1.05  7 Jan 2001: Updated README file

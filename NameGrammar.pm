@@ -137,6 +137,21 @@ full_name :
    }
    |
 
+   title(?) given_name given_name surname non_matching(?)
+   {
+      $return =
+      {
+         title_1       => $item[1][0],
+         given_name_1  => $item[2],
+         middle_name   => $item[3],
+         surname_1     => $item[4],
+         non_matching  => $item[5][0],
+         number        => 1,
+         type          => 'John_Adam_Smith'
+      }
+   }
+   |
+   
    title given_name middle_initial surname non_matching(?)
    {
       $return =
@@ -176,20 +191,6 @@ full_name :
          non_matching  => $item[4][0],
          number        => 1,
          type          => 'Mr_A_Smith'  
-      }
-   }
-   |
-   
-   given_name given_name surname non_matching(?)
-   {
-      $return =
-      {
-         given_name_1  => $item[1],
-         middle_name   => $item[2],
-         surname_1     => $item[3],
-         non_matching  => $item[4][0],
-         number        => 1,
-         type          => 'John_Adam_Smith'
       }
    }
    |
@@ -304,10 +305,15 @@ q{
    /(Air )?Commodore /i          |
    /(Air )?Marshall /i           |
    /Lieutenant (Colonel )?/i     |
+   /Lt\.? Col\.? /i              | 
+   /Lt\.? Gen\.? /i              | 
+   /Lt\.? Cdr\.? /i              | 
    /(Lt|Leut|Lieut)\.? /i        |
    /Colonel /i                   |
-   /Lt\.? ((Col|Gen|Cdr)\. )?/   | 
-   /Maj(\.|or)? (Gen(\.|eral)? )? /i | 
+   /Major General /i             |
+   /Maj\.? Gen\.?/i              | 
+   /Major /i                     |
+   /Maj\.? /i                    | 
 
    # Religious
    /Rabbi /i                     |   
@@ -317,8 +323,12 @@ q{
    /Pastor /i                    |
    /Bishop /i                    |
    /Mother (Superior )?/i        |
-   /([Mt|V] )?Revd?\.? /i        |  
-   /([Most|Very] )?Rever[e|a]nd /i |
+   /Most Rever[e|a]nd /i         |
+   /Very Rever[e|a]nd /i         |
+   /Mt\.? Revd\.? /i             |  
+   /V\.? Revd?\.? /i             |  
+   /Rever[e|a]nd /i              |
+   /Revd?\.? /i                  |  
    
    # Other
    /Prof(\.|essor)? /i |

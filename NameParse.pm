@@ -462,7 +462,7 @@ use strict;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.11';
+$VERSION   = '1.12';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -482,7 +482,7 @@ my %component_order=
    'Mr_John_A_Smith'         => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
    'Mr_John_Smith'           => ['precursor','title_1','given_name_1','surname_1','suffix'],
    'Mr_A_Smith'              => ['precursor','title_1','initials_1','surname_1','suffix'],
-   'John_Adam_Smith'         => ['precursor','given_name_1','middle_name','surname_1','suffix'],
+   'John_Adam_Smith'         => ['precursor','title_1','given_name_1','middle_name','surname_1','suffix'],
    'John_A_Smith'            => ['precursor','given_name_1','initials_1','surname_1','suffix'],
    'John_Smith'              => ['precursor','given_name_1','surname_1','suffix'],
    'A_Smith'                 => ['precursor','initials_1','surname_1']
