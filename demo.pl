@@ -6,7 +6,6 @@ use Lingua::EN::NameParse qw(&case_surname &clean);
 
 
 # Quick casing, no parsing or context check
-
 $input = "DE TANGELO";
 print("$input :",&case_surname($input,1),"\n\n");
 
@@ -16,7 +15,7 @@ my %args =
    sal_default    => 'Friend',
    auto_clean     => 1,
    force_case     => 1,
-   lc_prefix      => 1,
+   lc_prefix      => 0,
    initials       => 2,
    allow_reversed => 1  
 );
@@ -69,16 +68,29 @@ close(REPORT_FH);
 __DATA__
 MR AB MACMURDO
 LIEUTENANT COLONEL DE DE SILVA
-REVERAND S.A. VON DER MERVIN SENIOR
 <MR AND MRS AB & CD O'BRIEN>
 MR AB AND M/S CD VAN DER HEIDEN-MACNAY
  MR AS & D.E. DE LA MARE
 ESTATE OF THE LATE AB LE FONTAIN
-BIG BROTHER & THE HOLDING COMPANY
+mr. eugene anderson i
+mr. eugene anderson ii
+mr. eugene anderson iii
+mr. eugene anderson iv
+mr. eugene anderson v
+mr. eugene anderson vi
+mr. eugene anderson vii
+mr. eugene anderson viii
+mr. eugene anderson ix
+mr. eugene anderson x
+mr. eugene anderson xi
+mr. eugene anderson xii
+mr. eugene anderson xiii
 MR KA MACQUARIE JNR.
+REVERAND S.A. VON DER MERVIN SNR
+BIG BROTHER & THE HOLDING COMPANY
 RIGHT HONOURABLE MR PJ KEATING
 MR TOM JONES
-MR JO TAYLOR IV
+Robert James Hawke
 EDWARD G WHITLAM
 JAMES BROWN
 MR AS SMI9TH

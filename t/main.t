@@ -97,7 +97,7 @@ print &clean($input) eq 'Bad Name' ? "ok 9\n" : "not ok 9\n";
 # Test reverse order names
 $input = "de silva, m/s de";
 $name->parse($input);
-my %props = $name->properties;
+%props = $name->properties;
 if ( $props{type} eq 'Mr_A_Smith' )
 {
 	print "ok 10\n";

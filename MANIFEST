@@ -4,6 +4,7 @@ Changes
 Makefile.PL
 demo.pl
 NameParse.pm
+NameGrammar.pm
 surname_prefs.txt
 t/main.t
 t/rules.t
