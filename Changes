@@ -1,12 +1,15 @@
 
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.04 10 Dec 2000: Allowed for reversed order names where the surname appears
+                  first, followed by a comma and the rest of the name, such as
+                  title, first name, initials etc.
+
 
 1.03 25 Jul 2000: Added suffixes (like Jnr) to most single names 
                   Replaced '=head3' because they don't work with perldoc
                   Removed search of @INC array in BEGIN subroutine 
                   Thanks to Douglas Wilson for these requests
-
 
 1.02 19 Apr 2000: Removed title J\.? (abbreivation for Judge) as it clashed 
                   with names such as J A Smith, J. B. Jones etc. Thanks to 

@@ -8,12 +8,14 @@ Lingua::EN::NameParse - routines for manipulating a persons name
 
    my %args = 
    (
-      salutation  => 'Dear',
-      sal_default => 'Friend',
-      auto_clean  => 1,
-      force_case  => 1,
-      lc_prefix   => 1,
-      initials    => 3   
+      salutation     => 'Dear',
+      sal_default    => 'Friend',
+      auto_clean     => 1,
+      force_case     => 1,
+      lc_prefix      => 1,
+      initials       => 3,   
+      allow_reversed => 1   
+      
    );
 
    my $name = new Lingua::EN::NameParse(%args); 
@@ -120,18 +122,21 @@ following methods are invoked. Note that the object only needs to be
 created ONCE, and can be reused with new input data. Call new repeatedly
 will significantly slow your program down.
 
-Various setup options may be defined in a hash that is passed as an 
-optional argument to the C<new> method.
+Various setup options may be defined in a hash that is passed as an optional 
+argument to the C<new> method. Note that all the arguments as well
 
    my %args = 
    (
-      salutation  => 'Dear',
-      sal_default => 'Friend',
-      auto_clean  => 1,
-      force_case  => 1,
-      lc_prefix   => 1,
-      initials    => 3   
+      salutation     => 'Dear',
+      sal_default    => 'Friend',
+      auto_clean     => 1,
+      force_case     => 1,
+      lc_prefix      => 1,
+      initials       => 3,   
+      allow_reversed => 1   
+      
    );
+   
 
    my $name = new Lingua::EN::NameParse(%args); 
 
@@ -181,6 +186,22 @@ or Ms AS von der Heiden.
 
 Allows the user to control the number of letters that can occur in the initials.
 Valid settings are 1,2 or 3. If no value is supplied a default of 2 is used.  
+
+=item allow_reversed
+
+When this option is set to a positive value, names in reverse order will be
+proceseed. The only valid format is the surname followed by a comma and the
+rest of the name, which can be in any of the combinations allowed by non
+reversed names. Some examples are:
+
+Smith, Mr AB
+Jones, Jim
+De Silva, Professor A.B. 
+
+The program change the order of the name back to the non reversed format, and 
+then peforms the normal parsing. Note that if the name can be parsed, the fact
+that it's order was orginally reversed, is not recorded as a property of the
+name object.
   
 
 =head2 parse
@@ -435,7 +456,7 @@ use strict;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.03';
+$VERSION   = '1.04';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -900,7 +921,8 @@ sub new
    my $name = {};
    bless($name,$class);
 
-   # Unless defined by user, assume up to 2 initials per name
+   # Default to 2 initials per name. Can be overwritten if user defines 
+   # 'initials' as a key in the hash supplied to new method.
    $name->{initials} = 2;
    
    # ADD ERROR CHECKING FOR INVALID KEYS
@@ -959,6 +981,17 @@ sub parse
    my ($input_string) = @_;
 
    chomp($input_string);
+   
+   # If reverse orders names are allowed, swap the surname component, before
+   # the comma, with the rest of the name. Rejoin the name, replacing comma 
+   # with a space.
+   
+   if ( $name->{allow_reversed} and $input_string =~ /,/ )
+   {
+   	my ($first,$second) = split(/,/,$input_string);
+      $input_string = join(' ',$second,$first); 
+   }
+   
    $name = &_assemble($name,$input_string);
    &_validate($name);    
 

@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# File  : rules.t - test script for Lingua::EN::::NameParse.pm 
+# File  : rules.t - test script for Lingua::EN::NameParse.pm 
 #                                            
 # Author: Kim Ryan (kimaryan@ozemail.com.au) 
 # Date  : 1 May 1999                         

@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Test script for Lingua::EN::::NameParse.pm 
+# Test script for Lingua::EN::NameParse.pm 
 #                                            
 # Author: Kim Ryan (kimaryan@ozemail.com.au) 
 # Date  : 1 May 1999                         
@@ -10,7 +10,7 @@ use Lingua::EN::NameParse qw(clean case_surname);
 
 # We start with some black magic to print on failure.
 
-BEGIN { print "1..9\n"; }
+BEGIN { print "1..10\n"; }
 
 # Main tests
 
@@ -23,11 +23,12 @@ print &case_surname($input) eq 'Big Brother & The Holding Company'
   
 my %args = 
 (
-  salutation  => 'Dear',
-  sal_default => 'Friend',
-  auto_clean  => 1,
-  force_case  => 1,
-  initials    => 3  
+  salutation     => 'Dear',
+  sal_default    => 'Friend',
+  auto_clean     => 1,
+  force_case     => 1,
+  initials       => 3,
+  allow_reversed => 1  
 );
 
 my $name = new Lingua::EN::NameParse(%args); 
@@ -54,13 +55,14 @@ $name->parse($input);
 print $name->salutation eq 'Dear Friend' ? "ok 5\n" : "not ok 5\n";
 
 # Test component extraction
-$input = "Estate Of The Late Lieutenant Colonel AB Van Der Heiden";
+$input = "Estate Of The Late Lieutenant Colonel AB Van Der Heiden Jnr";
 $name->parse($input);
 my %comps = $name->case_components;
 if ( $comps{precursor} eq 'Estate Of The Late' and 
    $comps{title_1} eq 'Lieutenant Colonel' and 
    $comps{initials_1} eq 'AB' and
-   $comps{surname_1} eq 'Van Der Heiden' )
+   $comps{surname_1} eq 'Van Der Heiden' and
+   $comps{suffix} eq 'Jnr' ) 
 {
    print "ok 6\n";   
 }
@@ -91,5 +93,19 @@ print $props{non_matching} eq '& Associates' ? "ok 8\n" : "not ok 8\n";
 # Test cleaning
 $input = '   Bad Na89me!';
 print &clean($input) eq 'Bad Name' ? "ok 9\n" : "not ok 9\n";
+
+# Test reverse order names
+$input = "de silva, m/s de";
+$name->parse($input);
+my %props = $name->properties;
+if ( $props{type} eq 'Mr_A_Smith' )
+{
+	print "ok 10\n";
+}
+else
+{
+	print "not ok 10\n";
+}
+
 
 

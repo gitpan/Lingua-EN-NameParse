@@ -12,12 +12,13 @@ print("$input :",&case_surname($input,1),"\n\n");
 
 my %args = 
 (
-   salutation  => 'Dear',
-   sal_default => 'Friend',
-   auto_clean  => 1,
-   force_case  => 1,
-   lc_prefix   => 1,
-   initials    => 3  
+   salutation     => 'Dear',
+   sal_default    => 'Friend',
+   auto_clean     => 1,
+   force_case     => 1,
+   lc_prefix      => 1,
+   initials       => 2,
+   allow_reversed => 1  
 );
 
 my $name = new Lingua::EN::NameParse(%args); 
@@ -82,3 +83,7 @@ EDWARD G WHITLAM
 JAMES BROWN
 MR AS SMI9TH
 prof a.s.d. genius
+Coltrane, Mr. John
+Davis, Miles A.
+Smith, Mr AB
+De Silva, Professor A.B.
