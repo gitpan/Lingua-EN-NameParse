@@ -1,12 +1,17 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.21 20 May 2005
+    Fixed bug that was creating a name cased surname of O'sullivan, now O'Sullivan
+    Added report method to dump all name properties and components
+    Added several new suffixes such as PhD
+
 1.20 16 Feb 2004
     Fixed bug that was preventing some extended titles, such as 'Major General'
     from working
 
 1.19 27 Dec 2003
     Fixed bug in rules.t, thanks to Assad Arnaud 
-    Added more vailid surnames in _valid_name, thanks to Peter Schendzielorz
+    Added more valid surnames in _valid_name, thanks to Peter Schendzielorz
 
 
 1.18 28 Mar 2002

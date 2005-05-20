@@ -17,7 +17,7 @@ my %args =
    auto_clean      => 1,
    force_case      => 1,
    lc_prefix       => 0,
-   initials        => 2,
+   initials        => 3,
    allow_reversed  => 1,
    joint_names     => 1,
    extended_titles => 1,
@@ -103,3 +103,12 @@ Coltrane, Mr. John
 Davis, Miles A.
 Smith, Mr AB
 De Silva, Professor A.B.
+Air Marshall William Dunn
+Major General William Dunn
+J.R.R. Tolkien
+James Graham, Marquess of Montrose
+Flight Officer John Gillespie Magee
+Sir Author Conan Doyle
+Major JA Dunn
+
+

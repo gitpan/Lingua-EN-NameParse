@@ -8,3 +8,4 @@ NameGrammar.pm
 surname_prefs.txt
 t/main.t
 t/rules.t
+META.yml                                 Module meta-data (added by MakeMaker)

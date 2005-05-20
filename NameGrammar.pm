@@ -555,6 +555,10 @@ q{
       /Esq(\.|uire)?\b ?/i |
       /Sn?r\.?\b ?/i | # Senior
       /Jn?r\.?\b ?/i | # Junior
+      /PhD\.?\b ?/i  | 
+      /MD\.?\b ?/i   | 
+      /LLB\.?\b ?/i  | 
+
 
       /XI{1,3}\b ?/i | # 11th, 12th, 13th
       /X\b ?/i       | # 10th

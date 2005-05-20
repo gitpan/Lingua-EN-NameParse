@@ -4,43 +4,45 @@ Lingua::EN::NameParse - routines for manipulating a person's name
 
 SYNOPSIS
 
-   use Lingua::EN::NameParse qw(clean case_surname);
+	use Lingua::EN::NameParse qw(clean case_surname);
 
-   # optional configuration arguments
-   my %args =
-   (
-      salutation      => 'Dear',
-      sal_default     => 'Friend',
-      auto_clean      => 1,
-      force_case      => 1,
-      lc_prefix       => 1,
-      initials        => 3,
-      allow_reversed  => 1,
-      joint_names     => 0,
-      extended_titles => 1
-   );
+	# optional configuration arguments
+	my %args =
+	(
+		salutation      => 'Dear',
+		sal_default     => 'Friend',
+		auto_clean      => 1,
+		force_case      => 1,
+		lc_prefix       => 1,
+		initials        => 3,
+		allow_reversed  => 1,
+		joint_names     => 0,
+		extended_titles => 1
+	);
 
-   my $name = new Lingua::EN::NameParse(%args);
+	my $name = new Lingua::EN::NameParse(%args);
 
-   $error = $name->parse("MR AC DE SILVA");
+	$error = $name->parse("MR AC DE SILVA");
 
-   %name_comps = $name->components;
-   $surname = $name_comps{surname_1}; # DE SILVA
+	%name_comps = $name->components;
+	$surname = $name_comps{surname_1}; # DE SILVA
 
-   $correct_casing = $name->case_all; # Mr AC de Silva
+	$correct_casing = $name->case_all; # Mr AC de Silva
 
-   $correct_casing = $name->case_all_reversed ; # de Silva, AC
+	$correct_casing = $name->case_all_reversed ; # de Silva, AC
 
-   $good_name = &clean("Bad Na9me   "); # "Bad Name"
+	$good_name = &clean("Bad Na9me   "); # "Bad Name"
 
-   $name->salutation; # Dear Mr de Silva
+	$name->salutation; # Dear Mr de Silva
 
-   %my_properties = $name->properties;
-   $number_surnames = $my_properties{number}; # 1
-   $bad_input = $my_properties{non_matching};
+	%my_properties = $name->properties;
+	$number_surnames = $my_properties{number}; # 1
+	$bad_input = $my_properties{non_matching};
 
-   $lc_prefix = 0;
-   $correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
+	$name->report; # create a report listing all information about the parsed name
+
+	$lc_prefix = 0;
+	$correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
 
 
 DESCRIPTION
@@ -86,7 +88,7 @@ NameParse was written by Kim Ryan, kimryan at cpan dot org
 
 COPYRIGHT
 
-Copyright (c) 1999-2004 Kim Ryan. All rights reserved.
+Copyright (c) 1999-2005 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).

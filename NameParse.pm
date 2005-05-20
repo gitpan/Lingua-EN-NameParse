@@ -4,44 +4,45 @@ Lingua::EN::NameParse - routines for manipulating a person's name
 
 =head1 SYNOPSIS
 
-   use Lingua::EN::NameParse qw(clean case_surname);
+    use Lingua::EN::NameParse qw(clean case_surname);
 
-   # optional configuration arguments
-   my %args =
-   (
-      salutation      => 'Dear',
-      sal_default     => 'Friend',
-      auto_clean      => 1,
-      force_case      => 1,
-      lc_prefix       => 1,
-      initials        => 3,
-      allow_reversed  => 1,
-      joint_names     => 0,
-      extended_titles => 0
+    # optional configuration arguments
+    my %args =
+    (
+        salutation      => 'Dear',
+        sal_default     => 'Friend',
+        auto_clean      => 1,
+        force_case      => 1,
+        lc_prefix       => 1,
+        initials        => 3,
+        allow_reversed  => 1,
+        joint_names     => 0,
+        extended_titles => 0
+    );
 
-   );
+    my $name = new Lingua::EN::NameParse(%args);
 
-   my $name = new Lingua::EN::NameParse(%args);
+    $error = $name->parse("MR AC DE SILVA");
 
-   $error = $name->parse("MR AC DE SILVA");
+    %name_comps = $name->components;
+    $surname = $name_comps{surname_1}; # DE SILVA
 
-   %name_comps = $name->components;
-   $surname = $name_comps{surname_1}; # DE SILVA
+    $correct_casing = $name->case_all; # Mr AC de Silva
 
-   $correct_casing = $name->case_all; # Mr AC de Silva
+    $correct_casing = $name->case_all_reversed ; # de Silva, AC
 
-   $correct_casing = $name->case_all_reversed ; # de Silva, AC
+    $good_name = &clean("Bad Na9me   "); # "Bad Name"
 
-   $good_name = &clean("Bad Na9me   "); # "Bad Name"
+    $name->salutation; # Dear Mr de Silva
 
-   $name->salutation; # Dear Mr de Silva
+    %my_properties = $name->properties;
+    $number_surnames = $my_properties{number}; # 1
+    $bad_input = $my_properties{non_matching};
 
-   %my_properties = $name->properties;
-   $number_surnames = $my_properties{number}; # 1
-   $bad_input = $my_properties{non_matching};
+    $name->report; # create a report listing all information about the parsed name
 
-   $lc_prefix = 0;
-   $correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
+    $lc_prefix = 0;
+    $correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
 
 =head1 REQUIRES
 
@@ -97,32 +98,32 @@ in peoples names, such as Mr AB McNay.
 To describe the formats supported by NameParse, a short hand representation
 of the name is used. The following formats are currently supported :
 
-   Mr_A_Smith_&_Ms_B_Jones
-   Mr_&_Ms_A_&_B_Smith
-   Mr_A_&_Ms_B_Smith
-   Mr_&_Ms_A_Smith
-   Mr_A_&_B_Smith
-   Mr_John_A_Smith
-   Mr_John_Smith
-   Mr_A_Smith
-   John_Adam_Smith
-   John_A_Smith
-   J_Adam_Smith
-   John_Smith
-   A_Smith
+    Mr_A_Smith_&_Ms_B_Jones
+    Mr_&_Ms_A_&_B_Smith
+    Mr_A_&_Ms_B_Smith
+    Mr_&_Ms_A_Smith
+    Mr_A_&_B_Smith
+    Mr_John_A_Smith
+    Mr_John_Smith
+    Mr_A_Smith
+    John_Adam_Smith
+    John_A_Smith
+    J_Adam_Smith
+    John_Smith
+    A_Smith
 
 
 Precursors and suffixes are only applied to the following formats:
 
-Mr_John_A_Smith
-Mr_John_Smith
-Mr_John_Smith
-Mr_A_Smith
-John_Adam_Smith
-John_A_Smith
-J_Adam_Smith
-John_Smith
-A_Smith
+    Mr_John_A_Smith
+    Mr_John_Smith
+    Mr_John_Smith
+    Mr_A_Smith
+    John_Adam_Smith
+    John_A_Smith
+    J_Adam_Smith
+    John_Smith
+    A_Smith
 
 
 =head1 METHODS
@@ -425,6 +426,13 @@ Returns any unmatched section that was found.
 
 =back
 
+=head2 report
+
+Create a formatted text report to standard output listing 
+- the input string, 
+- the name and value of each defined component 
+- any non matching component
+
 
 =head1 LIMITATIONS
 
@@ -508,7 +516,7 @@ and not be retained with the suffix.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1999-2004 Kim Ryan. All rights reserved.
+Copyright (c) 1999-2005 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it
 and/or modify it under the terms of the Perl Artistic License
 (see http://www.perl.com/perl/misc/Artistic.html).
@@ -541,7 +549,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK $VERSION);
 
-$VERSION   = '1.20';
+$VERSION   = '1.21';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -886,9 +894,10 @@ sub case_surname
    # Correct for possessives such as "John's" or "Australia's". Although this
    # should not occur in a person's name, they are valid for proper names.
    # As this subroutine may be used to capitalise words other than names,
-   # we need to account for this case.
+   # we may need to account for this case. Note that the s must be at the
+   # end of the string
    s/(\w+)'S(\s+)/$1's$2/;
-   s/(\w+)'S/$1's/;
+   s/(\w+)'S$/$1's/;
 
 
    # Correct for roman numerals, excluding single letter cases I,V and X,
@@ -970,6 +979,39 @@ sub properties
 {
    my $name = shift;
    return(%{ $name->{properties} });
+}
+
+
+#-------------------------------------------------------------------------------
+# Create a text report to standard output listing 
+# - the input string, 
+# - the name of each defined component 
+# - any non matching component
+
+sub report
+{
+    my $name = shift;
+
+    printf("%-17.17s : %-40.40s\n","Input",$name->{input_string});
+    my %comps = $name->case_components;
+    foreach my $comp ( sort keys %comps)
+    {
+        if ($comps{$comp}  )
+        {
+            printf("%-17.17s : %-40.40s\n",$comp,$comps{$comp});
+        }
+    }
+    my %props = $name->properties;
+    if ( $props{type} )
+    {
+        printf("%-17.17s : %-40.40s\n","Name type",$props{type});
+    }
+
+    if ( $props{non_matching} )
+    {
+        printf("%-17.17s : %-40.40s\n","Parsing Error","Yes");
+        printf("%-17.17s : %-40.40s\n","Non matching part",$props{non_matching});
+    }
 }
 #-------------------------------------------------------------------------------
 
