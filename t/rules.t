@@ -1,16 +1,11 @@
 #------------------------------------------------------------------------------
-# File  : rules.t - test script for Lingua::EN::NameParse.pm
-#
-# Author      : Kim Ryan
-# Last update : 23 Mar 2002
+# File   : rules.t - test script for Lingua::EN::NameParse.pm
+# Author : Kim Ryan
 #------------------------------------------------------------------------------
 
 use strict;
+use Test::Simple tests => 17;
 use Lingua::EN::NameParse;
-
-# We start with some black magic to print on failure.
-
-BEGIN { print "1..13\n"; }
 
 my %args =
 (
@@ -22,70 +17,90 @@ my ($input,%props);
 
 # Test order of rule evaluation
 
+$input = "MR ADAM SMITH & MS DEBRA JONES";
+$name->parse($input);
+%props = $name->properties;
+ok( $props{type} eq 'Mr_John_Smith_&_Ms_Mary_Jones', 'Mr_John_Smith_&_Ms_Mary_Jones format');
+
 $input = "MR AB SMITH & MS D.E. JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_A_Smith_&_Ms_B_Jones' ? "ok 1\n" : "not ok 1\n";
+ok( $props{type} eq 'Mr_A_Smith_&_Ms_B_Jones', 'Mr_A_Smith_&_Ms_B_Jones format');
 
 $input = "MR AND MRS AB & D.E. JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_&_Ms_A_&_B_Smith' ? "ok 2\n" : "not ok 2\n";
+ok( $props{type} eq 'Mr_&_Ms_A_&_B_Smith', 'Mr_&_Ms_A_&_B_Smith format');
 
 $input = "MR AB AND MS D.E. JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_A_&_Ms_B_Smith' ? "ok 3\n" : "not ok 3\n";
+ok( $props{type} eq 'Mr_A_&_Ms_B_Smith', 'Mr_A_&_Ms_B_Smith format');
 
 $input = "MR AND MS D.E. JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_&_Ms_A_Smith' ? "ok 4\n" : "not ok 4\n";
+ok( $props{type} eq 'Mr_&_Ms_A_Smith', 'Mr_&_Ms_A_Smith format');
 
 $input = "MR AB AND D.E. JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_A_&_B_Smith' ? "ok 5\n" : "not ok 5\n";
+ok( $props{type} eq 'Mr_A_&_B_Smith', 'Mr_A_&_B_Smith format');
+
+$input = "ADAM SMITH & DEBRA JONES";
+$name->parse($input);
+%props = $name->properties;
+ok( $props{type} eq 'John_Smith_&_Mary_Jones', 'John_Smith_&_Mary_Jones format');
+
+$input = "ADAM & DEBRA SMITH";
+$name->parse($input);
+%props = $name->properties;
+ok( $props{type} eq 'John_&_Mary_Smith', 'John_&_Mary_Smith format');
+
+$input = "A SMITH & D JONES ";
+$name->parse($input);
+%props = $name->properties;
+ok( $props{type} eq 'A_Smith_&_B_Jones', 'A_Smith_&_B_Jones format');
 
 $input = "MR JOHN F KENNEDY";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_John_A_Smith' ? "ok 6\n" : "not ok 6\n";
+ok( $props{type} eq 'Mr_John_A_Smith', 'Mr_John_A_Smith format');
 
 $input = "MR TOM JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_John_Smith' ? "ok 7\n" : "not ok 7\n";
+ok( $props{type} eq 'Mr_John_Smith', 'Mr_John_Smith format');
 
 $input = "MR AB JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'Mr_A_Smith' ? "ok 8\n" : "not ok 8\n";
+ok( $props{type} eq 'Mr_A_Smith', 'Mr_A_Smith format');
 
 $input = "WILLIAM JEFFERSON CLINTON";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'John_Adam_Smith' ? "ok 9\n" : "not ok 9\n";
+ok( $props{type} eq 'John_Adam_Smith', 'John_Adam_Smith format');
 
 $input = "F SCOTT FITZGERALD";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'J_Adam_Smith' ? "ok 10\n" : "not ok 10\n";
+ok( $props{type} eq 'J_Adam_Smith', 'J_Adam_Smith format');
 
 
 $input = "JOHN F KENNEDY";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'John_A_Smith' ? "ok 11\n" : "not ok 11\n";
+ok( $props{type} eq 'John_A_Smith', 'John_A_Smith format');
 
 $input = "TOM JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'John_Smith' ? "ok 12\n" : "not ok 12\n";
+ok( $props{type} eq 'John_Smith', 'John_Smith format');
 
 $input = "AB JONES";
 $name->parse($input);
 %props = $name->properties;
-print $props{type} eq 'A_Smith' ? "ok 13\n" : "not ok 13\n";
+ok( $props{type} eq 'A_Smith', 'A_Smith format');
 
 

@@ -4,34 +4,9 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile
 (
-   'VERSION_FROM'    => 'NameParse.pm',
-   'clean'           =>
-   {
-      'FILES'        => 'blib/* Makefile MANIFEST Lingua-EN-NameParse-*'
-   },
-   'dist'            =>
-   {
-      'COMPRESS'     => 'gzip',
-      'SUFFIX'       => 'gz'
-   },
-   'DISTNAME'        => 'Lingua-EN-NameParse',
-
-   ( $] >= 5.005 ?
-      (
-          ABSTRACT => 'Manipulate peoples names, titles and initials',
-          AUTHOR   => 'Kim Ryan',
-      ) : ()
-   ),
-
-   'NAME'            => 'Lingua::EN::NameParse',
-   'PM'              =>
-   {
-      'NameParse.pm'   => '$(INST_LIBDIR)/NameParse.pm',
-      'NameGrammar.pm' => '$(INST_LIBDIR)/NameGrammar.pm',
-
-   },
-   'PREREQ_PM'       =>
-   {
-      'Parse::RecDescent' => 0,
-   }
+    'NAME'         => 'Lingua::EN::NameParse',
+    'VERSION_FROM' => 'lib/Lingua/EN/NameParse.pm',
+    'ABSTRACT'    => 'Manipulate peoples names, titles and initials',
+    'AUTHOR'      => 'Kim Ryan',
+    'PREREQ_PM'   =>  { 'Parse::RecDescent' => 0 }
 );

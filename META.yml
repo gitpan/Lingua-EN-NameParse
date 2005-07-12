@@ -1,8 +1,8 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Lingua-EN-NameParse
-version:      1.21
-version_from: NameParse.pm
+version:      1.22
+version_from: lib/Lingua/EN/NameParse.pm
 installdirs:  site
 requires:
     Parse::RecDescent:             0

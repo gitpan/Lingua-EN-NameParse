@@ -1,5 +1,12 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.22 12 Jul 2005
+    Added the Mr_John_Smith_&_Ms_Mary_Jones name type
+    Added the John_Smith_&_Mary_Jones name type
+    Added the John_&_Mary_Smith name type
+    Added the A_Smith_&_B_Jones name type
+    Updated distribution to current CPAN requirements 
+
 1.21 20 May 2005
     Fixed bug that was creating a name cased surname of O'sullivan, now O'Sullivan
     Added report method to dump all name properties and components
@@ -76,7 +83,6 @@ Revision history for Perl CPAN module Lingua::En::NameParse
     Allowed for apostrophes in given names, like D'Artagnan
     Fixed bug for suffixes in 'John_Smith' name type
     Added the John_Adam_Smith name type
-    Thanks to 560@altavista.net for above bug reports and suggestions
 
     Added correct capitalization of possessive proper names such as 
     Australia's to case_surname. Thanks to Dennis Ingram.

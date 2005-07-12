@@ -16,16 +16,19 @@ To avoid premature matches, when one rule is a sub set of another longer rule,
 it must appear after the longer rule. See the Parse::RecDescent documentation
 for more details.
 
-=head1 COPYRIGHT
-
-Copyright (c) 1999-2004 Kim Ryan. All rights reserved.
-This program is free software; you can redistribute it
-and/or modify it under the terms of the Perl Artistic License
-(see http://www.perl.com/perl/misc/Artistic.html).
 
 =head1 AUTHOR
 
 NameGrammar was written by Kim Ryan <kimryan at cpan dot org>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2005 Kim Ryan. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.4 or,
+at your option, any later version of Perl 5 you may have available.
+
 
 
 
@@ -33,20 +36,21 @@ NameGrammar was written by Kim Ryan <kimryan at cpan dot org>.
 #------------------------------------------------------------------------------
 
 package Lingua::EN::NameGrammar;
+use strict;
 
 
 # Rules that define valid orderings of a names components
 
-$rules_start = q{ full_name : };
+my $rules_start = q{ full_name : };
 
-$rules_joint_names =
+my $rules_joint_names =
 q{
 
    # A (?) refers to an optional component, occurring 0 or more times.
    # Optional items are returned as an array, which for our case will
    # always consist of one element, when they exist.
 
-   title initials surname conjunction title initials surname non_matching(?)
+   title given_name surname conjunction title given_name surname non_matching(?)
    {
       # block of code to define actions upon successful completion of a
       # 'production' or rule
@@ -56,6 +60,25 @@ q{
       {
          # Parse::RecDescent lets you return a single scalar, which we use as
          # an anonymous hash reference
+         title_1       => $item[1],
+         given_name_1  => $item[2],
+         surname_1     => $item[3],
+         conjunction_1 => $item[4],
+         title_2       => $item[5],
+         given_name_2  => $item[6],
+         surname_2     => $item[7],
+         non_matching  => $item[8][0],
+         number        => 2,
+         type          => 'Mr_John_Smith_&_Ms_Mary_Jones'
+      }
+   }
+   |
+
+
+   title initials surname conjunction title initials surname non_matching(?)
+   {
+      $return =
+      {
          title_1       => $item[1],
          initials_1    => $item[2],
          surname_1     => $item[3],
@@ -142,9 +165,59 @@ q{
       }
    }
    |
+
+   given_name surname conjunction  given_name surname non_matching(?)
+   {
+      $return =
+      {
+         given_name_1  => $item[1],
+         surname_1     => $item[2],
+         conjunction_1 => $item[3],
+         given_name_2  => $item[4],
+         surname_2     => $item[5],
+         non_matching  => $item[6][0],
+         number        => 2,
+         type          => 'John_Smith_&_Mary_Jones'
+      }
+   }
+   |
+
+   initials surname conjunction  initials surname non_matching(?)
+   {
+      $return =
+      {
+         initials_1    => $item[1],
+         surname_1     => $item[2],
+         conjunction_1 => $item[3],
+         initials_2    => $item[4],
+         surname_2     => $item[5],
+         non_matching  => $item[6][0],
+         number        => 2,
+         type          => 'A_Smith_&_B_Jones'
+      }
+   }
+   |
+
+   given_name conjunction given_name surname non_matching(?)
+   {
+      $return =
+      {
+         given_name_1  => $item[1],
+         conjunction_1 => $item[2],
+         given_name_2  => $item[3],
+         surname_2     => $item[4],
+         non_matching  => $item[5][0],
+         number        => 2,
+         type          => 'John_&_Mary_Smith'
+      }
+   }
+   |
+
+
+
 };
 
-$rules_single_names =
+my $rules_single_names =
 q{
 
    precursor(?) title given_name single_initial surname suffix(?) non_matching(?)
@@ -290,7 +363,7 @@ q{
 # Individual components that a name can be composed from. Components are
 # expressed as literals or Perl regular expressions.
 
-$precursors =
+my $precursors =
 q
 {
     precursor : 
@@ -307,7 +380,7 @@ q
 
 };
 
-$titles =
+my $titles =
 q{
 
    title :
@@ -324,7 +397,7 @@ q{
 
 };
    
-$extended_titles =
+my $extended_titles =
 q{
                        |
    /Messrs /i          |   # plural or Mr
@@ -407,37 +480,37 @@ q{
    /Ald(\.|erman)? /i
 };
 
-$conjunction = q{ conjunction : /And |& /i };
+my $conjunction = q{ conjunction : /And |& /i };
 
 # Used in the John_A_Smith and J_Adam_Smith name types. Although this 
 # duplicates $initials_1, it is needed because this type of initial must 
 # always be one character long, regardless of the length of initials set 
 # by the user in the 'new' method.
-$single_initial = q{ single_initial: /[A-Z]\.? /i };
+my $single_initial = q{ single_initial: /[A-Z]\.? /i };
 
 # Define given name combinations, specifying the minimum number of letters.
 # The correct pair of rules is determined by the 'initials' key in the hash
 # passed to the 'new' method.
 
 # Jo, Jo-Anne, D'Artagnan, O'Shaugnessy La'Keishia
-$given_name_min_2 =
+my $given_name_min_2 =
 q{
     given_name: /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
 };
 
 # Joe ...
-$given_name_min_3 =
+my $given_name_min_3 =
 q{
     given_name: /[A-Z]{3,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
 };
 
-$given_name_min_4 =
+my $given_name_min_4 =
 q{
     given_name: /[A-Z]{4,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{3,} /i
 };
 
 # For use with John_Adam_Smith and John_A_Smith name types
-$fixed_length_given_name =
+my $fixed_length_given_name =
 q{
     given_name_min_2 : /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
 };
@@ -447,24 +520,24 @@ q{
 # Order from most complex to simplest,  to avoid premature matching.
 
 # 'A' 'A.'
-$initials_1 = q{ initials: /[A-Z]\.? /i };
+my $initials_1 = q{ initials: /[A-Z]\.? /i };
 
 # 'A. B.' 'A.B.' 'AB' 'A B'
 
-$initials_2 =
+my $initials_2 =
 q{
    initials:  /([A-Z]\. ){1,2}/i | /([A-Z]\.){1,2} /i | /([A-Z] ){1,2}/i | /([A-Z]){1,2} /i
 };
 
 # 'A. B. C. '  'A.B.C' 'ABC' 'A B C'
-$initials_3 =
+my $initials_3 =
 q{
    initials: /([A-Z]\. ){1,3}/i |  /([A-Z]\.){1,3} /i | /([A-Z] ){1,3}/i | /([A-Z]){1,3} /i
 };
 
 
 # Jo, Jo-Anne, La'Keishia, D'Artagnan, O'Shaugnessy 
-$middle_name =
+my $middle_name =
 q{
    middle_name: 
    
@@ -478,7 +551,7 @@ q{
 };
 
 
-$full_surname =
+my $full_surname =
 q{
    # Use look-ahead to avoid ambiguity between surname and suffix. For example,
    # John Smith Snr, would detect Snr as the surname and Smith as the middle name
@@ -545,7 +618,7 @@ q{
 
 };
 
-$suffix =
+my $suffix =
 q{
    suffix:
 
@@ -573,13 +646,13 @@ q{
 # with detecting suffixes like Snr. and Jnr. The dot here gets picked up
 # as non matching.
 
-$non_matching = q{ non_matching: /.{2,}/ };
+my $non_matching = q{ non_matching: /.{2,}/ };
 
 
 #-------------------------------------------------------------------------------
 # Assemble correct combination for grammar tree.
 
-sub create
+sub _create
 {
    my $name = shift;
 

@@ -3,9 +3,11 @@ README
 Changes
 Makefile.PL
 demo.pl
-NameParse.pm
-NameGrammar.pm
+lib/Lingua/EN/NameParse.pm
+lib/Lingua/EN/NameGrammar.pm
 surname_prefs.txt
 t/main.t
 t/rules.t
-META.yml                                 Module meta-data (added by MakeMaker)
+t/pod.t
+t/pod-coverage.t
+META.yml

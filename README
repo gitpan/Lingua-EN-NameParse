@@ -71,7 +71,7 @@ lists of names.
 
 REQUIRES
 
-Perl, version 5.001 or higher and Parse::RecDescent
+Parse::RecDescent
 
 
 HOW TO INSTALL
@@ -86,7 +86,7 @@ AUTHOR
 
 NameParse was written by Kim Ryan, kimryan at cpan dot org
 
-COPYRIGHT
+COPYRIGHT AND LICENSE
 
 Copyright (c) 1999-2005 Kim Ryan. All rights reserved.
 This program is free software; you can redistribute it

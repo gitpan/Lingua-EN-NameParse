@@ -44,10 +44,6 @@ Lingua::EN::NameParse - routines for manipulating a person's name
     $lc_prefix = 0;
     $correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
 
-=head1 REQUIRES
-
-Perl, version 5.001 or higher and Parse::RecDescent
-
 
 =head1 DESCRIPTION
 
@@ -501,8 +497,8 @@ languages.
 
 =head1 SEE ALSO
 
-Lingua::EN::AddressParse, Lingua::EN::MatchNames, Lingua::EN::NickNames,
-Lingua::EN::NameCase, Parse::RecDescent
+L<Lingua::EN::AddressParse>, L<Lingua::EN::MatchNames>, L<Lingua::EN::NickNames>,
+L<Lingua::EN::NameCase>, L<Parse::RecDescent>
 
 
 =head1 TO DO
@@ -513,18 +509,7 @@ Lingua::EN::NameCase, Parse::RecDescent
 The dot in a suffix of Jnr. or Snr. will be consumed as unmatched text,
 and not be retained with the suffix.
 
-
-=head1 COPYRIGHT
-
-Copyright (c) 1999-2005 Kim Ryan. All rights reserved.
-This program is free software; you can redistribute it
-and/or modify it under the terms of the Perl Artistic License
-(see http://www.perl.com/perl/misc/Artistic.html).
-
-
-=head1 AUTHOR
-
-NameParse was written by Kim Ryan <kimryan at cpan dot org>
+=head1 CREDITS
 
 Thanks to all the people who provided ideas and suggestions, including -
 
@@ -534,27 +519,36 @@ Thanks to all the people who provided ideas and suggestions, including -
    Ron Savage, Alastair Adam Huffman, Douglas Wilson
    Peter Schendzielorz
 
+=head1 AUTHOR
+
+NameParse was written by Kim Ryan <kimryan at cpan dot org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2005 Kim Ryan. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.4 or,
+at your option, any later version of Perl 5 you may have available.
+
+
 =cut
 
 #-------------------------------------------------------------------------------
 
 package Lingua::EN::NameParse;
 
-use 5.001;
 use strict;
 
 use Lingua::EN::NameGrammar;
 use Parse::RecDescent;
 
 use Exporter;
-use vars qw (@ISA @EXPORT_OK $VERSION);
+use vars qw (@ISA @EXPORT_OK);
 
-$VERSION   = '1.21';
+our $VERSION   = '1.22';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
-
-
-
 
 #-------------------------------------------------------------------------------
 # Create a new instance of a name parsing object. This step is time consuming
@@ -585,7 +579,7 @@ sub new
       }
    }
 
-   my $grammar = &Lingua::EN::NameGrammar::create($name);
+   my $grammar = &Lingua::EN::NameGrammar::_create($name);
    $name->{parse} = new Parse::RecDescent($grammar);
 
    return ($name);
@@ -678,7 +672,7 @@ sub case_components
         foreach $current_key ( keys %orig_components )
         {
             my $cased_value;
-            if ( $current_key =~ /initials/ ) # intials_1, possibly initials_2
+            if ( $current_key =~ /initials/ ) # initials_1, possibly initials_2
             {
                 $cased_value = uc($orig_components{$current_key});
             }
@@ -706,31 +700,36 @@ sub case_components
 
 my %component_order=
 (
-   'Mr_A_Smith_&_Ms_B_Jones' => ['title_1','initials_1','surname_1','conjunction_1','title_2','initials_2','surname_2'],
-   'Mr_&_Ms_A_&_B_Smith'     => ['title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2','surname_1'],
-   'Mr_A_&_Ms_B_Smith'       => ['title_1','initials_1','conjunction_1','title_2','initials_2','surname_1'],
-   'Mr_&_Ms_A_Smith'         => ['title_1','conjunction_1','title_2','initials_1','surname_1'],
-   'Mr_A_&_B_Smith'          => ['title_1','initials_1','conjunction_1','initials_2','surname_1'],
-   'Mr_John_A_Smith'         => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
-   'Mr_John_Smith'           => ['precursor','title_1','given_name_1','surname_1','suffix'],
-   'Mr_A_Smith'              => ['precursor','title_1','initials_1','surname_1','suffix'],
-   'John_Adam_Smith'         => ['precursor','title_1','given_name_1','middle_name','surname_1','suffix'],
-   'John_A_Smith'            => ['precursor','given_name_1','initials_1','surname_1','suffix'],
-   'J_Adam_Smith'            => ['precursor','initials_1','middle_name','surname_1','suffix'],
-   'John_Smith'              => ['precursor','given_name_1','surname_1','suffix'],
-   'A_Smith'                 => ['precursor','initials_1','surname_1','suffix']
+    'Mr_John_Smith_&_Ms_Mary_Jones' => ['title_1','given_name_1','surname_1','conjunction_1','title_2','given_name_2','surname_2'],
+    'Mr_A_Smith_&_Ms_B_Jones' => ['title_1','initials_1','surname_1','conjunction_1','title_2','initials_2','surname_2'],
+    'Mr_&_Ms_A_&_B_Smith'     => ['title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2','surname_1'],
+    'Mr_A_&_Ms_B_Smith'       => ['title_1','initials_1','conjunction_1','title_2','initials_2','surname_1'],
+    'Mr_&_Ms_A_Smith'         => ['title_1','conjunction_1','title_2','initials_1','surname_1'],
+    'Mr_A_&_B_Smith'          => ['title_1','initials_1','conjunction_1','initials_2','surname_1'],
+    'John_Smith_&_Mary_Jones' => ['given_name_1','surname_1','conjunction_1','given_name_2','surname_2'],
+    'John_&_Mary_Smith'       => ['given_name_1','conjunction_1','given_name_2','surname_1'],
+    'A_Smith_&_B_Jones'       => ['initials_1','surname_1','conjunction_1','initials_2','surname_2'],
+
+    'Mr_John_A_Smith'  => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
+    'Mr_John_Smith'    => ['precursor','title_1','given_name_1','surname_1','suffix'],
+    'Mr_A_Smith'       => ['precursor','title_1','initials_1','surname_1','suffix'],
+    'John_Adam_Smith'  => ['precursor','title_1','given_name_1','middle_name','surname_1','suffix'],
+    'John_A_Smith'     => ['precursor','given_name_1','initials_1','surname_1','suffix'],
+    'J_Adam_Smith'     => ['precursor','initials_1','middle_name','surname_1','suffix'],
+    'John_Smith'       => ['precursor','given_name_1','surname_1','suffix'],
+    'A_Smith'          => ['precursor','initials_1','surname_1','suffix']
 );
 
 my %reverse_component_order=
 (
-   'Mr_John_A_Smith'         => ['surname_1','given_name_1','initials_1','suffix'],
-   'Mr_John_Smith'           => ['surname_1','given_name_1','suffix'],
-   'Mr_A_Smith'              => ['surname_1','initials_1','suffix'],
-   'John_Adam_Smith'         => ['surname_1','given_name_1','middle_name','suffix'],
-   'John_A_Smith'            => ['surname_1','given_name_1','initials_1','suffix'],
-   'J_Adam_Smith'            => ['surname_1','initials_1','middle_name','suffix'],
-   'John_Smith'              => ['surname_1','given_name_1','suffix'],
-   'A_Smith'                 => ['surname_1','initials_1','suffix']
+   'Mr_John_A_Smith'  => ['surname_1','given_name_1','initials_1','suffix'],
+   'Mr_John_Smith'    => ['surname_1','given_name_1','suffix'],
+   'Mr_A_Smith'       => ['surname_1','initials_1','suffix'],
+   'John_Adam_Smith'  => ['surname_1','given_name_1','middle_name','suffix'],
+   'John_A_Smith'     => ['surname_1','given_name_1','initials_1','suffix'],
+   'J_Adam_Smith'     => ['surname_1','initials_1','middle_name','suffix'],
+   'John_Smith'       => ['surname_1','given_name_1','suffix'],
+   'A_Smith'          => ['surname_1','initials_1','suffix']
 );
 
 #-------------------------------------------------------------------------------
@@ -1073,6 +1072,13 @@ sub _assemble
    {
       $name->{components}{given_name_1} = &_trim_space($parsed_name->{given_name_1});
    }
+
+   $name->{components}{given_name_2} = '';
+   if ( $parsed_name->{given_name_2} )
+   {
+      $name->{components}{given_name_2} = &_trim_space($parsed_name->{given_name_2});
+   }
+
 
    $name->{components}{middle_name} = '';
    if ( $parsed_name->{middle_name} )
