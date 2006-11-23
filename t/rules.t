@@ -87,7 +87,6 @@ $name->parse($input);
 %props = $name->properties;
 ok( $props{type} eq 'J_Adam_Smith', 'J_Adam_Smith format');
 
-
 $input = "JOHN F KENNEDY";
 $name->parse($input);
 %props = $name->properties;

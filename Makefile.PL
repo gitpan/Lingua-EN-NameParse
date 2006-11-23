@@ -8,5 +8,6 @@ WriteMakefile
     'VERSION_FROM' => 'lib/Lingua/EN/NameParse.pm',
     'ABSTRACT'    => 'Manipulate peoples names, titles and initials',
     'AUTHOR'      => 'Kim Ryan',
+    'LICENSE'     => 'perl',
     'PREREQ_PM'   =>  { 'Parse::RecDescent' => 0 }
 );

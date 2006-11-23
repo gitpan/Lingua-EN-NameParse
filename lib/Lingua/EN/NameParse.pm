@@ -99,7 +99,9 @@ of the name is used. The following formats are currently supported :
     Mr_A_&_Ms_B_Smith
     Mr_&_Ms_A_Smith
     Mr_A_&_B_Smith
+    Mr_John_Adam_Smith
     Mr_John_A_Smith
+    Mr_J_Adam_Smith
     Mr_John_Smith
     Mr_A_Smith
     John_Adam_Smith
@@ -256,7 +258,6 @@ the following titles are accounted for:
 Note that if this option is not specified, than by default extended titles
 are ignored. Disabling  extended titles speeds up the processing.
 
-
 =back
 
 =head2 parse
@@ -306,12 +307,13 @@ The method returns the entire reverse order cased name as text.
 
 The C<case_components> method does the same thing as the C<case_all> method,
 but returns the name cased components in a hash. The following keys are used
-for each component-
+for each component:
 
    precursor
    title_1
    title_2
    given_name_1
+   given_name_2
    initials_1
    initials_2
    middle_name
@@ -321,7 +323,7 @@ for each component-
    surname_2
    suffix
 
-If a key has no matching data for a given name, it's values will be
+If a component has no matching data for a given name, it's values will be
 set to the empty string.
 
 
@@ -546,7 +548,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK);
 
-our $VERSION   = '1.22';
+our $VERSION   = '1.23';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -650,7 +652,14 @@ sub clean
 sub components
 {
     my $name = shift;
-    return(%{ $name->{components} });
+    if ( $name->{properties}{type} eq 'unknown'  )
+    {
+        return(undef);
+    }
+    else
+    {
+        return(%{ $name->{components} });
+    }
 }
 #-------------------------------------------------------------------------------
 # Apply correct capitalisation to each component of a person's name.
@@ -710,26 +719,26 @@ my %component_order=
     'John_&_Mary_Smith'       => ['given_name_1','conjunction_1','given_name_2','surname_1'],
     'A_Smith_&_B_Jones'       => ['initials_1','surname_1','conjunction_1','initials_2','surname_2'],
 
-    'Mr_John_A_Smith'  => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
-    'Mr_John_Smith'    => ['precursor','title_1','given_name_1','surname_1','suffix'],
-    'Mr_A_Smith'       => ['precursor','title_1','initials_1','surname_1','suffix'],
-    'John_Adam_Smith'  => ['precursor','title_1','given_name_1','middle_name','surname_1','suffix'],
-    'John_A_Smith'     => ['precursor','given_name_1','initials_1','surname_1','suffix'],
-    'J_Adam_Smith'     => ['precursor','initials_1','middle_name','surname_1','suffix'],
-    'John_Smith'       => ['precursor','given_name_1','surname_1','suffix'],
-    'A_Smith'          => ['precursor','initials_1','surname_1','suffix']
+    'Mr_John_A_Smith' => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
+    'Mr_John_Smith'   => ['precursor','title_1','given_name_1','surname_1','suffix'],
+    'Mr_A_Smith'      => ['precursor','title_1','initials_1','surname_1','suffix'],
+    'John_Adam_Smith' => ['precursor','given_name_1','middle_name','surname_1','suffix'],
+    'John_A_Smith'    => ['precursor','given_name_1','initials_1','surname_1','suffix'],
+    'J_Adam_Smith'    => ['precursor','initials_1','middle_name','surname_1','suffix'],
+    'John_Smith'      => ['precursor','given_name_1','surname_1','suffix'],
+    'A_Smith'         => ['precursor','initials_1','surname_1','suffix']
 );
 
 my %reverse_component_order=
 (
-   'Mr_John_A_Smith'  => ['surname_1','given_name_1','initials_1','suffix'],
-   'Mr_John_Smith'    => ['surname_1','given_name_1','suffix'],
-   'Mr_A_Smith'       => ['surname_1','initials_1','suffix'],
-   'John_Adam_Smith'  => ['surname_1','given_name_1','middle_name','suffix'],
-   'John_A_Smith'     => ['surname_1','given_name_1','initials_1','suffix'],
-   'J_Adam_Smith'     => ['surname_1','initials_1','middle_name','suffix'],
-   'John_Smith'       => ['surname_1','given_name_1','suffix'],
-   'A_Smith'          => ['surname_1','initials_1','suffix']
+   'Mr_John_A_Smith'      => ['surname_1','given_name_1','initials_1','suffix'],
+   'Mr_John_Smith'        => ['surname_1','given_name_1','suffix'],
+   'Mr_A_Smith'           => ['surname_1','initials_1','suffix'],
+   'John_Adam_Smith'      => ['surname_1','given_name_1','middle_name','suffix'],
+   'John_A_Smith'         => ['surname_1','given_name_1','initials_1','suffix'],
+   'J_Adam_Smith'         => ['surname_1','initials_1','middle_name','suffix'],
+   'John_Smith'           => ['surname_1','given_name_1','suffix'],
+   'A_Smith'              => ['surname_1','initials_1','suffix']
 );
 
 #-------------------------------------------------------------------------------
@@ -834,80 +843,79 @@ BEGIN
 
 sub case_surname
 {
-   my ($surname,$lc_prefix) = @_;
+    my ($surname,$lc_prefix) = @_;
 
-   # If the user has specified a preferred capitalisation for this
-   # surname in the surname_prefs.txt, it should be returned now.
-   if ($Lingua::EN::surname_preferences{lc($surname)} )
-   {
-      return($Lingua::EN::surname_preferences{lc($surname)});
-   }
+    # If the user has specified a preferred capitalisation for this
+    # surname in the surname_prefs.txt, it should be returned now.
+    if ($Lingua::EN::surname_preferences{lc($surname)} )
+    {
+        return($Lingua::EN::surname_preferences{lc($surname)});
+    }
 
-   # Lowercase everything
-   $_ = lc($surname);
+    # Lowercase everything
+    $surname = lc($surname);
 
-   # Now uppercase first letter of every word. By checking on word boundaries,
-   # we will account for apostrophes (D'Angelo) and hyphenated names
-   s/\b(\w)/\u$1/g;
+    # Now uppercase first letter of every word. By checking on word boundaries,
+    # we will account for apostrophes (D'Angelo) and hyphenated names
+    $surname =~ s/\b(\w)/\u$1/g;
 
-   # Name case Macs and Mcs
-   # Exclude names with 1-2 letters after prefix like Mack, Macky, Mace
-   # Exclude names ending in a,c,i,o,z or j, typically Polish or Italian
+    # Name case Macs and Mcs
+    # Exclude names with 1-2 letters after prefix like Mack, Macky, Mace
+    # Exclude names ending in a,c,i,o,z or j, typically Polish or Italian
 
-   if ( /\bMac[a-z]{2,}[^a|c|i|o|z|j]\b/i  )
-   {
-      s/\b(Mac)([a-z]+)/$1\u$2/ig;
+    if ( $surname =~ /\bMac[a-z]{2,}[^a|c|i|o|z|j]\b/i  )
+    {
+        $surname =~ s/\b(Mac)([a-z]+)/$1\u$2/ig;
 
-      # Now correct for "Mac" exceptions
-      s/MacHin/Machin/;
-      s/MacHlin/Machlin/;
-      s/MacHar/Machar/;
-      s/MacKle/Mackle/;
-      s/MacKlin/Macklin/;
-      s/MacKie/Mackie/;
+        # Now correct for "Mac" exceptions
+        $surname =~ s/MacHin/Machin/;
+        $surname =~ s/MacHlin/Machlin/;
+        $surname =~ s/MacHar/Machar/;
+        $surname =~ s/MacKle/Mackle/;
+        $surname =~ s/MacKlin/Macklin/;
+        $surname =~ s/MacKie/Mackie/;
 
-      # Portuguese
-      s/MacHado/Machado/;
+        # Portuguese
+        $surname =~ s/MacHado/Machado/;
 
-      # Lithuanian
-      s/MacEvicius/Macevicius/;
-      s/MacIulis/Maciulis/;
-      s/MacIas/Macias/;
-   }
-   elsif ( /\bMc/i )
-   {
-      s/\b(Mc)([a-z]+)/$1\u$2/ig;
-   }
-   # Exceptions (only 'Mac' name ending in 'o' ?)
-   s/Macmurdo/MacMurdo/;
-
-
-   if ( $lc_prefix )
-   {
-      # Lowercase first letter of every word in prefix. The trailing space
-      # prevents the surname from being altered. Note that spellings like
-      # d'Angelo are not accounted for.
-      s/\b(\w+ )/\l$1/g;
-   }
-
-   # Correct for possessives such as "John's" or "Australia's". Although this
-   # should not occur in a person's name, they are valid for proper names.
-   # As this subroutine may be used to capitalise words other than names,
-   # we may need to account for this case. Note that the s must be at the
-   # end of the string
-   s/(\w+)'S(\s+)/$1's$2/;
-   s/(\w+)'S$/$1's/;
+        # Lithuanian
+        $surname =~ s/MacEvicius/Macevicius/;
+        $surname =~ s/MacIulis/Maciulis/;
+        $surname =~ s/MacIas/Macias/;
+    }
+    elsif ( /\bMc/i )
+    {
+        $surname =~ s/\b(Mc)([a-z]+)/$1\u$2/ig;
+    }
+    # Exceptions (only 'Mac' name ending in 'o' ?)
+    $surname =~ s/Macmurdo/MacMurdo/;
 
 
-   # Correct for roman numerals, excluding single letter cases I,V and X,
-   # which will work with the above code
-   s/\b(I{2,3})\b/\U$1/i;  # 2nd, 3rd
-   s/\b(IV)\b/\U$1/i;      # 4th
-   s/\b(VI{1,3})\b/\U$1/i; # 6th, 7th, 8th
-   s/\b(IX)\b/\U$1/i;      # 9th
-   s/\b(XI{1,3})\b/\U$1/i; # 11th, 12th, 13th
+    if ( $lc_prefix )
+    {
+        # Lowercase first letter of every word in prefix. The trailing space
+        # prevents the surname from being altered. Note that spellings like
+        # d'Angelo are not accounted for.
+        $surname =~ s/\b(\w+ )/\l$1/g;
+    }
 
-   return($_);
+    # Correct for possessives such as "John's" or "Australia's". Although this
+    # should not occur in a person's name, they are valid for proper names.
+    # As this subroutine may be used to capitalise words other than names,
+    # we may need to account for this case. Note that the s must be at the
+    # end of the string
+    $surname =~ s/(\w+)'S(\s+)/$1's$2/;
+    $surname =~ s/(\w+)'S$/$1's/;
+
+    # Correct for roman numerals, excluding single letter cases I,V and X,
+    # which will work with the above code
+    $surname =~ s/\b(I{2,3})\b/\U$1/i;  # 2nd, 3rd
+    $surname =~ s/\b(IV)\b/\U$1/i;      # 4th
+    $surname =~ s/\b(VI{1,3})\b/\U$1/i; # 6th, 7th, 8th
+    $surname =~ s/\b(IX)\b/\U$1/i;      # 9th
+    $surname =~ s/\b(XI{1,3})\b/\U$1/i; # 11th, 12th, 13th
+
+    return($surname);
 }
 #-------------------------------------------------------------------------------
 # Create a personalised greeting from one or two person's names
@@ -993,11 +1001,11 @@ sub report
 
     printf("%-17.17s : %-40.40s\n","Input",$name->{input_string});
     my %comps = $name->case_components;
-    foreach my $comp ( sort keys %comps)
+    if ( %comps )
     {
-        if ($comps{$comp}  )
+        foreach my $comp ( sort keys %comps)
         {
-            printf("%-17.17s : %-40.40s\n",$comp,$comps{$comp});
+            printf("%-17.17s : %s\n",$comp,$comps{$comp});
         }
     }
     my %props = $name->properties;
@@ -1049,87 +1057,87 @@ sub _assemble
    # now be removed from the components, and will be restored by the
    # case_all and salutation methods, if called.
 
-   $name->{components}{precursor} = '';
+   $name->{components}{precursor} = q{};
    if ( $parsed_name->{precursor} )
    {
       $name->{components}{precursor} = &_trim_space($parsed_name->{precursor});
    }
 
-   $name->{components}{title_1} = '';
+   $name->{components}{title_1} = q{};
    if ( $parsed_name->{title_1} )
    {
       $name->{components}{title_1} = &_trim_space($parsed_name->{title_1});
    }
 
-   $name->{components}{title_2} = '';
+   $name->{components}{title_2} = q{};
    if ( $parsed_name->{title_2} )
    {
       $name->{components}{title_2} = &_trim_space($parsed_name->{title_2});
    }
 
-   $name->{components}{given_name_1} = '';
+   $name->{components}{given_name_1} = q{};
    if ( $parsed_name->{given_name_1} )
    {
       $name->{components}{given_name_1} = &_trim_space($parsed_name->{given_name_1});
    }
 
-   $name->{components}{given_name_2} = '';
+   $name->{components}{given_name_2} = q{};
    if ( $parsed_name->{given_name_2} )
    {
       $name->{components}{given_name_2} = &_trim_space($parsed_name->{given_name_2});
    }
 
 
-   $name->{components}{middle_name} = '';
+   $name->{components}{middle_name} = q{};
    if ( $parsed_name->{middle_name} )
    {
       $name->{components}{middle_name} = &_trim_space($parsed_name->{middle_name});
    }
 
-   $name->{components}{initials_1} = '';
+   $name->{components}{initials_1} = q{};
    if ( $parsed_name->{initials_1} )
    {
       $name->{components}{initials_1} = &_trim_space($parsed_name->{initials_1});
    }
 
-   $name->{components}{initials_2} = '';
+   $name->{components}{initials_2} = q{};
    if ( $parsed_name->{initials_2} )
    {
       $name->{components}{initials_2} = &_trim_space($parsed_name->{initials_2});
    }
 
-   $name->{components}{conjunction_1} = '';
+   $name->{components}{conjunction_1} = q{};
    if ( $parsed_name->{conjunction_1} )
    {
       $name->{components}{conjunction_1} = &_trim_space($parsed_name->{conjunction_1});
    }
 
-   $name->{components}{conjunction_2} = '';
+   $name->{components}{conjunction_2} = q{};
    if ( $parsed_name->{conjunction_2} )
    {
       $name->{components}{conjunction_2} = &_trim_space($parsed_name->{conjunction_2});
    }
 
-   $name->{components}{surname_1} = '';
+   $name->{components}{surname_1} = q{};
    if ( $parsed_name->{surname_1} )
    {
       $name->{components}{surname_1} = &_trim_space($parsed_name->{surname_1});
    }
 
-   $name->{components}{surname_2} = '';
+   $name->{components}{surname_2} = q{};
    if ( $parsed_name->{surname_2} )
    {
       $name->{components}{surname_2} = &_trim_space($parsed_name->{surname_2});
    }
 
-   $name->{components}{suffix} = '';
+   $name->{components}{suffix} = q{};
    if ( $parsed_name->{suffix} )
    {
       $name->{components}{suffix} = &_trim_space($parsed_name->{suffix});
    }
 
 
-   $name->{properties}{non_matching} = '';
+   $name->{properties}{non_matching} = q{};
    if ( $parsed_name->{non_matching} ) 
    {
       $name->{properties}{non_matching}  = $parsed_name->{non_matching};

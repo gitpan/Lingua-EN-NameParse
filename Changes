@@ -1,5 +1,12 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.23 23 Nov 2006
+    components method now returns undef if name cannot be parsed. Thanks to Patrick Kane.
+    Stopped assigning to $_  in case_surname subroutine. Thanks to Richard Walker
+    Created examples folder
+    Fixed alignment problem in report method
+    Removed optional title from John_Adam_Smith name type
+
 1.22 12 Jul 2005
     Added the Mr_John_Smith_&_Ms_Mary_Jones name type
     Added the John_Smith_&_Mary_Jones name type

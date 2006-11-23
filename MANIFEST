@@ -2,7 +2,7 @@ MANIFEST
 README
 Changes
 Makefile.PL
-demo.pl
+examples/demo.pl
 lib/Lingua/EN/NameParse.pm
 lib/Lingua/EN/NameGrammar.pm
 surname_prefs.txt

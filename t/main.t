@@ -64,7 +64,7 @@ ok ( ($comps{precursor} eq 'Estate Of The Late' and
 $input = "m/s de de silva";
 $name->parse($input);
 my %props = $name->properties;
-ok ( ($props{number} == 1 and $props{type} eq 'Mr_A_Smith'),'properties');
+ok( ($props{number} == 1 and $props{type} eq 'Mr_A_Smith','properties'),'properties');
 
 # Test non matching
 $input = "Prof A Brain & Associates";
@@ -80,7 +80,7 @@ ok( &clean($input) eq 'Bad Name','cleaning');
 $input = "de silva, m/s de";
 $name->parse($input);
 %props = $name->properties;
-ok ( $props{type} eq 'Mr_A_Smith','reverse order'); 
+ok( $props{type} eq 'Mr_A_Smith','reverse order'); 
 
 my $lc_prefix = 1;
 # Test lower casing of surname prefix

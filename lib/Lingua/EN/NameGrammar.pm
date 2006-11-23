@@ -213,12 +213,11 @@ q{
    }
    |
 
-
-
 };
 
 my $rules_single_names =
 q{
+
 
    precursor(?) title given_name single_initial surname suffix(?) non_matching(?)
    {
@@ -236,6 +235,7 @@ q{
       }
    }
    |
+
 
    precursor(?) title given_name surname suffix(?) non_matching(?)
    {
@@ -269,17 +269,16 @@ q{
    }
    |
 
-   precursor(?) title(?) given_name_min_2 middle_name surname suffix(?) non_matching(?)
+   precursor(?)  given_name_min_2 middle_name surname suffix(?) non_matching(?)
    {
       $return =
       {
          precursor     => $item[1][0],
-         title_1       => $item[2][0],
-         given_name_1  => $item[3],
-         middle_name   => $item[4],
-         surname_1     => $item[5],
-         suffix        => $item[6][0],
-         non_matching  => $item[7][0],
+         given_name_1  => $item[2],
+         middle_name   => $item[3],
+         surname_1     => $item[4],
+         suffix        => $item[5][0],
+         non_matching  => $item[6][0],
          number        => 1,
          type          => 'John_Adam_Smith'
       }
@@ -662,10 +661,7 @@ sub _create
    {
        $grammar .= $rules_joint_names;
    }    
-   $grammar .= $rules_single_names;
-   
-   $grammar .= $precursors;
-   $grammar .= $titles;
+   $grammar .= $rules_single_names . $precursors . $titles;
 
     if ( $name->{extended_titles} )
     {
@@ -686,26 +682,23 @@ sub _create
 
    if ( $name->{initials} == 1 )
    {
-      $grammar .= $given_name_min_2;
-      $grammar .= $initials_1;
+      $grammar .= $given_name_min_2 . $initials_1;
    }
    elsif ( $name->{initials} == 2 )
    {
-      $grammar .= $given_name_min_3;
-      $grammar .= $initials_2;
+      $grammar .= $given_name_min_3 . $initials_2;
    }
    elsif ( $name->{initials} == 3 )
    {
-      $grammar .= $given_name_min_4;
-      $grammar .= $initials_3;
+      $grammar .= $given_name_min_4 . $initials_3;
    }
    
-   $grammar .= $fixed_length_given_name;
-   $grammar .= $middle_name;
-   $grammar .= $full_surname;
-   $grammar .= $suffix;
-   $grammar .= $non_matching;
-
+   $grammar .= $fixed_length_given_name
+             . $middle_name
+             . $full_surname
+             . $suffix
+             . $non_matching
+             ;
 
    return($grammar);
 }

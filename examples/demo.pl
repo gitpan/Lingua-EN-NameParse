@@ -2,11 +2,12 @@
 
 # Demo script for Lingua::EN::NameParse.pm
 
-use Lingua::EN::NameParse qw(&case_surname &clean);
+use Lingua::EN::NameParse qw(clean case_surname);
+use strict;
 
 
 # Quick casing, no parsing or context check
-$input = "FRENCH'S";
+my $input = "FRENCH'S";
 
 print("$input :",&case_surname($input,1),"\n\n");
 
@@ -25,25 +26,24 @@ my %args =
 );
 
 my $name = new Lingua::EN::NameParse(%args); 
-
+# Open files to contain errors, a report on data quality and 
+# an extract of all single names
 open(ERROR_FH,">errors.txt");
 open(REPORT_FH,">report.txt");
 open(EXTRACT_FH,">extract.txt");
 
 my ($num_names,$num_errors);
+# loop over all lines in dDATA block below
 while (<DATA>)
 {
    chomp($_);
-   $input = $_;
+   my $input = $_;
    $num_names++;
-   $error = $name->parse($input);
+   my $error = $name->parse($input);
 
-   unless ( $name->{properties}{type} eq 'unknown'  )
-   {
-      %comps = $name->case_components;
-   }
-   %props = $name->properties;
-   $bad_part = $props{non_matching};
+   my %comps = $name->case_components;
+   my %props = $name->properties;
+   my $bad_part = $props{non_matching};
 
    if ($error)
    {
@@ -110,5 +110,3 @@ James Graham, Marquess of Montrose
 Flight Officer John Gillespie Magee
 Sir Author Conan Doyle
 Major JA Dunn
-
-
