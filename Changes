@@ -1,5 +1,8 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.24 6 Jan 2008
+    Removed one more use to $_  in case_surname subroutine. Thanks to Ben Martin
+
 1.23 23 Nov 2006
     components method now returns undef if name cannot be parsed. Thanks to Patrick Kane.
     Stopped assigning to $_  in case_surname subroutine. Thanks to Richard Walker

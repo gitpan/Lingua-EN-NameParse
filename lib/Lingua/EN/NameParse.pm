@@ -527,7 +527,7 @@ NameParse was written by Kim Ryan <kimryan at cpan dot org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005 Kim Ryan. All rights reserved.
+Copyright (c) 2008 Kim Ryan. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.4 or,
@@ -548,7 +548,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK);
 
-our $VERSION   = '1.23';
+our $VERSION   = '1.24';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -883,7 +883,7 @@ sub case_surname
         $surname =~ s/MacIulis/Maciulis/;
         $surname =~ s/MacIas/Macias/;
     }
-    elsif ( /\bMc/i )
+    elsif ( $surname =~ /\bMc/i )
     {
         $surname =~ s/\b(Mc)([a-z]+)/$1\u$2/ig;
     }

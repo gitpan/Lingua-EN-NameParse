@@ -1,9 +1,9 @@
 --- #YAML:1.0
 name:                Lingua-EN-NameParse
-version:             1.23
+version:             1.24
 abstract:            Manipulate peoples names, titles and initials
 license:             perl
-generated_by:        ExtUtils::MakeMaker version 6.31
+generated_by:        ExtUtils::MakeMaker version 6.32
 distribution_type:   module
 requires:     
     Parse::RecDescent:             0
