@@ -219,6 +219,22 @@ q{
 my $rules_single_names =
 q{
 
+    precursor(?) title given_name middle_name surname suffix(?) non_matching(?)
+    {
+       $return =
+       {
+          precursor     => $item[1][0],
+          title_1       => $item[2],
+          given_name_1  => $item[3],
+          middle_name   => $item[4],
+          surname_1     => $item[5],
+          suffix        => $item[6][0],
+          non_matching  => $item[7][0],
+          number        => 1,
+          type          => 'Mr_John_Adam_Smith'
+       }
+    }
+    |
 
    precursor(?) title given_name single_initial surname suffix(?) non_matching(?)
    {
@@ -405,8 +421,13 @@ q{
    /Mister /i          |
    /Mast(\.|er)? /i    |
    /Ms?gr\.? /i        |   # Monsignor
+   /Count /i           |
+   /Countess /i        |   
+   /Duke /i            |
+   /Duchess /i         |
    /Lord /i            |
    /Lady /i            |
+   /Marquess i/        |
 
    /Madam(e)? /i       |
 
@@ -455,7 +476,8 @@ q{
    /Major General /i      |
    /Maj\.? Gen\.?/i       |
    /Major /i              |
-   /Maj\.? /i
+   /Maj\.? /i             |
+   /Pilot Officer / i     |
 
 
    # Religious
@@ -492,21 +514,21 @@ my $single_initial = q{ single_initial: /[A-Z]\.? /i };
 # The correct pair of rules is determined by the 'initials' key in the hash
 # passed to the 'new' method.
 
-# Jo, Jo-Anne, D'Artagnan, O'Shaugnessy La'Keishia
+# Examples are Jo, Jo-Anne, D'Artagnan, O'Shaugnessy La'Keishia, T-Bone
 my $given_name_min_2 =
 q{
-    given_name: /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
+    given_name: /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i | /T\-Bone/i
 };
 
 # Joe ...
 my $given_name_min_3 =
 q{
-    given_name: /[A-Z]{3,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i
+    given_name: /[A-Z]{3,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i | /T\-Bone/i
 };
 
 my $given_name_min_4 =
 q{
-    given_name: /[A-Z]{4,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{3,} /i
+    given_name: /[A-Z]{4,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{3,} /i | /T\-Bone/i
 };
 
 # For use with John_Adam_Smith and John_A_Smith name types

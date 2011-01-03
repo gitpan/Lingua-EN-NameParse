@@ -9,8 +9,6 @@ Lingua::EN::NameParse - routines for manipulating a person's name
     # optional configuration arguments
     my %args =
     (
-        salutation      => 'Dear',
-        sal_default     => 'Friend',
         auto_clean      => 1,
         force_case      => 1,
         lc_prefix       => 1,
@@ -32,8 +30,8 @@ Lingua::EN::NameParse - routines for manipulating a person's name
     $correct_casing = $name->case_all_reversed ; # de Silva, AC
 
     $good_name = &clean("Bad Na9me   "); # "Bad Name"
-
-    $name->salutation; # Dear Mr de Silva
+ 
+    $salutation = $name->salutation(salutation => 'Dear',sal_default => 'Friend')); # Dear Mr de Silva
 
     %my_properties = $name->properties;
     $number_surnames = $my_properties{number}; # 1
@@ -113,6 +111,7 @@ of the name is used. The following formats are currently supported :
 
 Precursors and suffixes are only applied to the following formats:
 
+    Mr_John_Adam_Smith
     Mr_John_A_Smith
     Mr_John_Smith
     Mr_John_Smith
@@ -141,8 +140,6 @@ usage.
 
    my %args =
    (
-      salutation     => 'Dear',
-      sal_default    => 'Friend',
       auto_clean     => 1,
       force_case     => 1,
       lc_prefix      => 1,
@@ -155,20 +152,6 @@ usage.
 
 
 =over 4
-
-=item salutation
-
-The option defines the salutation word, such as "Dear" or "Greetings". It
-must be defined if you are planning to use the C<salutation> method.
-
-=item sal_default
-
-This option defines the defaulting word to substitute for the title and
-surname(s), when parsing fails to identify them. It is also used when a
-precursor occurs. Examples are "Friend" or "Member". It must be defined if
-you are planning to use the C<salutation> method. If an '&' or 'and' occurs
-in the unmatched section then it is assumed that we are dealing with more than
-one person, and an 's' is appended to the defaulting word.
 
 =item force_case
 
@@ -210,7 +193,7 @@ Smith, Mr AB
 Jones, Jim
 De Silva, Professor A.B.
 
-The program change the order of the name back to the non reversed format, and
+The program changes the order of the name back to the non reversed format, and
 then performs the normal parsing. Note that if the name can be parsed, the fact
 that it's order was originally reversed, is not recorded as a property of the
 name object.
@@ -242,18 +225,7 @@ the following titles are accounted for:
     Dr
     Sir
     Dame
-    Reverend
-    Reverand
-    Father
-    Captain
-    Capt
-    Colonel
-    Col
-    General
-    Gen
-    Major
-    Maj
-
+ 
 
 Note that if this option is not specified, than by default extended titles
 are ignored. Disabling  extended titles speeds up the processing.
@@ -370,16 +342,33 @@ NameParse will still operate if the file does not exist
 
 =head2 salutation
 
+    $salutation = $name->salutation(salutation => 'Dear',sal_default => 'Friend',sal_type => 'given_name'));
+
 The C<salutation> method converts a name into a personal greeting,
-such as "Dear Mr & Mrs O'Brien".
+such as "Dear Mr & Mrs O'Brien" or "Dear Sue and John"
 
-If an error is detected during parsing, such as with the name
-"AB Smith & Associates", the title (if it occurs) and the surname(s) are
-replaced with a default word like "Friend" or "Member". If the input string
-contains a conjunction, an 's' is added to the default.
+Optional parameters may be specided in a hash as follows:
 
-If the name contains a precursor, a default salutation is also produced.
 
+    salutation:
+    
+    The greeting word such as 'Dear' or 'Greetings'. If not spefied than 'Dear' is used
+    
+    sal_default:
+    
+    The default word used when a personalised salution cannot be generated. If not
+    specified, than 'Friend' is used.
+    
+    sal_type:
+    
+    Can be either 'given_name' such as 'Dear Sue' or 'title_plus_name' such as 'Dear Ms Smith'
+    If not specified, than 'given_name' is used.
+
+If an error is detected during parsing, such as with the name "AB Smith & Associates",
+then the value of sal_default is used instead of a given name, or a title and surname.
+If the input string contains a conjunction, an 's' is added to the value of sal_default.
+
+If the name contains a precursor, a default salutation is produced.
 
 =head2 clean
 
@@ -408,6 +397,7 @@ The type of format a name is in, as one of the following strings:
    Mr_A_&_Ms_B_Smith
    Mr_&_Ms_A_Smith
    Mr_A_&_B_Smith
+   Mr_John_Adam_Smith
    Mr_John_A_Smith
    Mr_John_Smith
    Mr_A_Smith
@@ -555,7 +545,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK);
 
-our $VERSION   = '1.27';
+our $VERSION   = '1.28';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -565,33 +555,33 @@ our $VERSION   = '1.27';
 
 sub new
 {
-   my $class = shift;
-   my %args = @_;
-
-   my $name = {};
-   bless($name,$class);
-
-   # Default to 2 initials per name. Can be overwritten if user defines
-   # 'initials' as a key in the hash supplied to new method.
-   $name->{initials} = 2;
-
-   my $current_key;
-   foreach my $current_key (keys %args)
-   {
-      if ( $current_key eq 'salutation' or $current_key eq 'sal_default' )
-      {
-         $name->{$current_key} = &_case_word($args{$current_key});
-      }
-      else
-      {
-         $name->{$current_key} = $args{$current_key};
-      }
-   }
-
-   my $grammar = &Lingua::EN::NameGrammar::_create($name);
-   $name->{parse} = new Parse::RecDescent($grammar);
-
-   return ($name);
+    my $class = shift;
+    my %args = @_;
+    
+    my $name = {};
+    bless($name,$class);
+    
+    # Default to 2 initials per name. Can be overwritten if user defines
+    # 'initials' as a key in the hash supplied to new method.
+    $name->{initials} = 2;
+    
+    my $current_key;
+    foreach my $current_key (keys %args)
+    {
+        if ( $current_key eq 'salutation' or $current_key eq 'sal_default' )
+        {
+            $name->{$current_key} = &_case_word($args{$current_key});
+        }
+        else
+        {
+            $name->{$current_key} = $args{$current_key};
+        }
+    }
+    
+    my $grammar = &Lingua::EN::NameGrammar::_create($name);
+    $name->{parse} = new Parse::RecDescent($grammar);
+    
+    return ($name);
 }
 #-------------------------------------------------------------------------------
 # Attempt to parse a string and retrieve it's components and properties
@@ -600,41 +590,41 @@ sub new
 
 sub parse
 {
-   my $name = shift;
-   my ($input_string) = @_;
-
-   chomp($input_string);
-
-   # If reverse ordered names are allowed, swap the surname component, before
-   # the comma, with the rest of the name. Rejoin the name, replacing comma
-   # with a space.
-
-   if ( $name->{allow_reversed} and $input_string =~ /,/ )
-   {
-      my ($first,$second) = split(/,/,$input_string);
-      $input_string = join(' ',$second,$first);
-   }
-
-   $name->{components} = ();
-   $name->{properties} = ();
-   $name->{properties}{type} = 'unknown';
-   $name->{error} = 0;
-
-   $name->{input_string} = $input_string;
-
-   $name = &_pre_parse($name);
-   unless ( $name->{error} )
-   {
-       $name = &_assemble($name);
-       &_validate($name);
-
-       if ( $name->{error} and $name->{auto_clean} )
-       {
-          $name->{input_string} = &clean($name->{input_string});
-          $name = &_assemble($name);
-          &_validate($name);
-       }
-   }
+    my $name = shift;
+    my ($input_string) = @_;
+    
+    chomp($input_string);
+    
+    # If reverse ordered names are allowed, swap the surname component, before
+    # the comma, with the rest of the name. Rejoin the name, replacing comma
+    # with a space.
+    
+    if ( $name->{allow_reversed} and $input_string =~ /,/ )
+    {   
+        my ($first,$second) = split(/,/,$input_string);
+        $input_string = join(' ',$second,$first);
+    }
+    
+    $name->{components} = ();
+    $name->{properties} = ();
+    $name->{properties}{type} = 'unknown';
+    $name->{error} = 0;
+    
+    $name->{input_string} = $input_string;
+    
+    $name = &_pre_parse($name);
+    unless ( $name->{error} )
+    {
+        $name = &_assemble($name);
+        &_validate($name);
+    
+        if ( $name->{error} and $name->{auto_clean} )
+        {
+            $name->{input_string} = &clean($name->{input_string});
+            $name = &_assemble($name);
+            &_validate($name);
+        }
+    }
 
    return($name->{error});
 }
@@ -643,19 +633,19 @@ sub parse
 
 sub clean
 {
-   my ($input_string) = @_;
-
-   # remove illegal characters
-   $input_string =~ s/[^A-Za-z\-\'\.&\/ ]//go;
-
-   # remove repeating spaces
-   $input_string =~ s/  +/ /go ;
-
-   # remove any remaining leading or trailing space
-   $input_string =~ s/^ //;
-   $input_string =~ s/ $//;
-
-   return($input_string);
+    my ($input_string) = @_;
+    
+    # remove illegal characters
+    $input_string =~ s/[^A-Za-z\-\'\.&\/ ]//go;
+    
+    # remove repeating spaces
+    $input_string =~ s/  +/ /go ;
+    
+    # remove any remaining leading or trailing space
+    $input_string =~ s/^ //;
+    $input_string =~ s/ $//;
+    
+    return($input_string);
 }
 #-------------------------------------------------------------------------------
 # Given a name object, returns all components in a hash
@@ -714,8 +704,8 @@ sub case_components
 #-------------------------------------------------------------------------------
 # Hash of of lists, indicating the order that name components are assembled in.
 # Each list element is itself the name of the key value in a name object.
-# Used by the case_all, case_all_reversed and salutation methods.
-# These hashes are created here globally, ais quite a large overhead is
+# Used by the case_all and case_all_reversed  methods.
+# These hashes are created here globally, as quite a large overhead is
 # imposed if the are created locally, each time the method is invoked
 
 my %component_order=
@@ -730,18 +720,27 @@ my %component_order=
     'John_&_Mary_Smith'       => ['given_name_1','conjunction_1','given_name_2','surname_1'],
     'A_Smith_&_B_Jones'       => ['initials_1','surname_1','conjunction_1','initials_2','surname_2'],
 
-    'Mr_John_A_Smith' => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
-    'Mr_John_Smith'   => ['precursor','title_1','given_name_1','surname_1','suffix'],
-    'Mr_A_Smith'      => ['precursor','title_1','initials_1','surname_1','suffix'],
-    'John_Adam_Smith' => ['precursor','given_name_1','middle_name','surname_1','suffix'],
-    'John_A_Smith'    => ['precursor','given_name_1','initials_1','surname_1','suffix'],
-    'J_Adam_Smith'    => ['precursor','initials_1','middle_name','surname_1','suffix'],
-    'John_Smith'      => ['precursor','given_name_1','surname_1','suffix'],
-    'A_Smith'         => ['precursor','initials_1','surname_1','suffix']
+    'Mr_John_Adam_Smith'      => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
+    'Mr_John_A_Smith'         => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
+    'Mr_John_Smith'           => ['precursor','title_1','given_name_1','surname_1','suffix'],
+    'Mr_A_Smith'              => ['precursor','title_1','initials_1','surname_1','suffix'],
+    'John_Adam_Smith'         => ['precursor','given_name_1','middle_name','surname_1','suffix'],
+    'John_A_Smith'            => ['precursor','given_name_1','initials_1','surname_1','suffix'],
+    'J_Adam_Smith'            => ['precursor','initials_1','middle_name','surname_1','suffix'],
+    'John_Smith'              => ['precursor','given_name_1','surname_1','suffix'],
+    'A_Smith'                 => ['precursor','initials_1','surname_1','suffix']
 );
 
+# only include names with a single surname
 my %reverse_component_order=
 (
+   'Mr_&_Ms_A_&_B_Smith'  => ['surname_1','title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2'],
+   'Mr_A_&_Ms_B_Smith'    => ['surname_1','title_1','initials_1','conjunction_1','title_2','initials_2'],
+   'Mr_&_Ms_A_Smith'      => ['surname_1','title_1','conjunction_1','title_2','initials_1'],    
+   'Mr_A_&_B_Smith'       => ['surname_1','initials_1','conjunction_1','initials_2'],
+   'John_&_Mary_Smith'    => ['surname_1','given_name_1','conjunction_1','given_name_2'],
+   
+   'Mr_John_Adam_Smith'   => ['surname_1','given_name_1','middle_name','suffix'],
    'Mr_John_A_Smith'      => ['surname_1','given_name_1','initials_1','suffix'],
    'Mr_John_Smith'        => ['surname_1','given_name_1','suffix'],
    'Mr_A_Smith'           => ['surname_1','initials_1','suffix'],
@@ -754,74 +753,101 @@ my %reverse_component_order=
 
 #-------------------------------------------------------------------------------
 # Apply correct capitalisation to a person's entire name
-# Return a string of all cased components in correct order
+# If the name type is unknown, return undef
+# Else, return a string of all cased components in correct order
 
 sub case_all
 {
-   my $name = shift;
-
-   my @cased_name;
-
-   unless ( $name->{properties}{type} eq 'unknown'  )
-   {
-      my %component_vals = $name->case_components;
-      my @order = @{ $component_order{$name->{properties}{type} } };
-
-      foreach my $component_key ( @order )
-      {
-         # As some components such as precursors are optional, they will appear
-         # in the order array but may or may not have have a value, so only
-         # process defined values
-         if ( $component_vals{$component_key} )
-         {
-            push(@cased_name,$component_vals{$component_key});
-         }
-      }
-   }
-
-   if ( $name->{error} and $name->{force_case} )
-   {
-      # Despite errors, try to name case non-matching section. As the format
-      # of this section is unknown, surname case will provide the best
-      # approximation, but still fail on initials of more than 1 letter
-      push(@cased_name,&case_surname($name->{properties}{non_matching},$name->{lc_prefix}));
-   }
-
-   return(join(' ',@cased_name));
+    my $name = shift;
+    
+    my @cased_name;
+    
+    if ( $name->{properties}{type} eq 'unknown' )
+    {
+        return undef; 
+    }
+    
+    unless ( $component_order{$name->{properties}{type}} )
+    {
+        # component order missing in array defined above
+        warn "Component order not defined for: $name->{properties}{type}";
+        return undef;
+    }
+        
+    my %component_vals = $name->case_components;
+    my @order = @{ $component_order{$name->{properties}{type}} };
+    
+    foreach my $component_key ( @order )
+    {
+        # As some components such as precursors are optional, they will appear
+        # in the order array but may or may not have have a value, so only
+        # process defined values
+        if ( $component_vals{$component_key} )
+        {
+           push(@cased_name,$component_vals{$component_key});
+        }
+    }
+    if ( $name->{error} and $name->{force_case} )
+    {
+       # Despite errors, try to name case non-matching section. As the format
+       # of this section is unknown, surname case will provide the best
+       # approximation, but still fail on initials of more than 1 letter
+       push(@cased_name,&case_surname($name->{properties}{non_matching},$name->{lc_prefix}));
+    }
+    
+    return(join(' ',@cased_name));    
 }
+    
 #-------------------------------------------------------------------------------
-# Apply correct capitalisation to a person's entire name 
-# Return a string of all cased components in correct reversed order
+=head1 case_all_reversed
+
+Apply correct capitalisation to a person's entire name and reverse the order
+so that surname is first, followed by the other components, such as: Smith, Mr John A
+Useful for creating a list of names that can be sorted by surname.
+
+If name type is unknown , returns undef
+
+If the name type has a joint name, such as 'Mr_A_Smith_&_Ms_B_Jones', return undef,
+as it is ambigious which surname to place at the start of the string
+
+Else, returns a string of all cased components in correct reversed order
+
+=cut
 
 sub case_all_reversed
 {
-   my $name = shift;
-
-   my @cased_name_reversed;
-
-   unless ( $name->{properties}{type} eq 'unknown'  )
-   {
-      my %component_vals = $name->case_components;
-      my @reverse_order = @{ $reverse_component_order{$name->{properties}{type} } };
-
-      foreach my $component_key ( @reverse_order )
-      {
-         # As some components such as precursors are optional, they will appear
-         # in the order array but may or may not have have a value, so only
-         # process defined values
-         
-         my $component_value = $component_vals{$component_key};
-         if ( $component_value )
-         {
-            if ($component_key eq 'surname_1')
+    my $name = shift;
+    
+    my @cased_name_reversed;
+    
+    unless ( $name->{properties}{type} eq 'unknown'  )
+    {
+        unless ( $reverse_component_order{$name->{properties}{type} } )
+        {
+            # this type of name should not be reversed, such as two surnames
+            return undef;    
+        }
+        my %component_vals = $name->case_components;
+        my @reverse_order = @{ $reverse_component_order{$name->{properties}{type} } };
+        
+        foreach my $component_key ( @reverse_order )
+        {
+            # As some components such as precursors are optional, they will appear
+            # in the order array but may or may not have have a value, so only
+            # process defined values
+            
+            my $component_value = $component_vals{$component_key};
+            if ( $component_value )
             {
-                $component_value .= ',';
+                if ($component_key eq 'surname_1')
+                {
+                    $component_value .= ',';
+                }
+                push(@cased_name_reversed,$component_value);
             }
-            push(@cased_name_reversed,$component_value);
-         }
-      }
-   }
-   return(join(' ',@cased_name_reversed));
+        }
+    }
+    return(join(' ',@cased_name_reversed));
 }
 #-------------------------------------------------------------------------------
 # The user may specify their own preferred spelling for surnames.
@@ -913,7 +939,7 @@ sub case_surname
     # Correct for possessives such as "John's" or "Australia's". Although this
     # should not occur in a person's name, they are valid for proper names.
     # As this subroutine may be used to capitalise words other than names,
-    # we may need to account for this case. Note that the s must be at the
+    # we may need to account for this case. Note that the 's' must be at the
     # end of the string
     $surname =~ s/(\w+)'S(\s+)/$1's$2/;
     $surname =~ s/(\w+)'S$/$1's/;
@@ -930,80 +956,132 @@ sub case_surname
 }
 #-------------------------------------------------------------------------------
 # Create a personalised greeting from one or two person's names
-# Returns the salutation as a string, such as "Dear Mr Smith"
+# Returns the salutation as a string, such as "Dear Mr Smith", or "Dear Sue"
 
 sub salutation
 {
-   my $name = shift;
+    my $name = shift;
+    my %args = @_;
+    
+    my $salutation = 'Dear';
+    my $sal_default = 'Friend';
+    my $sal_type = 'title_plus_surname';
 
-   unless ( $name->{salutation} and  $name->{sal_default})
-   {
-      die ("No salutation word or default defined");
-   }
+    # Check to see if we should override defualts with any user specified preferences
+    if ( %args )
+    {
+        foreach my $current_key (keys %args)
+        {        
+            $current_key eq 'salutation' and $salutation = $args{$current_key};
+            $current_key eq 'sal_default' and $sal_default = $args{$current_key};
+            $current_key eq 'sal_type' and $sal_type = $args{$current_key};
+        }
+    }
+    
 
-   my @salutation;
-   push(@salutation,$name->{salutation});
-
-   # Personalised salutations cannot be created for Estates or people
-   # without some title, refer to default salutation
-   if
-   (
-      $name->{error} or
-      ( $name->{components}{precursor} and  $name->{components}{precursor} =~ /Estate/i)  or
-      not $name->{components}{title_1}
-   )
-   {
-      # create salutation in the form: Dear Friend(s)?
-      my $default = $name->{sal_default};
-
-      # Despite an error, the presence of a conjunction probably
-      # means we are dealing with 2 or more people.
-      # For example Mr AB Smith & John Jones
-      if ( $name->{input_string} =~ / (And|&) /i )
-      {
-         $default .= 's';
-      }
-      push(@salutation,$default);
-   }
-   else
-   {
-      # create salutation in the form: Dear <title(s)?> <surname(s)?>
-      my %component_vals = $name->case_components;
-      my @order = @{ $component_order{$name->{properties}{type} } };
-      my ($component,@cased_components);
-      foreach my $component ( @order )
-      {
-         unless
-         (
-            # ignore inital_1, initials_2, given_name_1, etc
-            $component =~ /precursor|initial|given_name|middle_name|suffix/ or
-            not $component_vals{$component} )
-         {
-            push(@salutation,$component_vals{$component});
-            # shared initial and surname (eg brothers), so duplicate title_1
-            if ( $name->{properties}{type} eq 'Mr_A_&_B_Smith' and $component eq 'conjunction_1' )
+    my @greeting;
+    push(@greeting,$salutation);
+    
+    # Personalised salutations cannot be created for Estates or people
+    # without some title
+    if
+    (
+        $name->{error} or
+        ( $name->{components}{precursor} and  $name->{components}{precursor} =~ /Estate/i)
+    )
+    {    
+        # Despite an error, the presence of a conjunction probably
+        # means we are dealing with 2 or more people.
+        # For example Mr AB Smith & John Jones
+        if ( $name->{input_string} =~ / (And|&) /i )
+        {
+           $sal_default .= 's';
+        }
+        push(@greeting,$sal_default);
+    }
+    else
+    {
+        my %component_vals = $name->case_components;
+        
+        if ( $sal_type eq 'given_name')
+        {
+            if ( $component_vals{'given_name_1'} )
             {
-               push(@salutation,$component_vals{title_1});
+                push(@greeting,$component_vals{'given_name_1'});
+                if ( $component_vals{'given_name_2'} )
+                {
+                    push(@greeting,$component_vals{'conjunction_1'});
+                    push(@greeting,$component_vals{'given_name_2'});
+                }
             }
-         }
-      }
-   }
-   return(join(' ',@salutation));
+            else
+            {
+                # No given name such as 'A_Smith','J_Adam_Smith','Mr_A_Smith'
+                # Must use default
+                push(@greeting,$sal_default);
+            }
+        }
+        elsif ( $sal_type eq 'title_plus_surname' )
+        {
+            if ( $name->{properties}{number} == 1 )
+            {            
+                if ( $component_vals{'title_1'} )
+                {
+                    push(@greeting,$component_vals{'title_1'});
+                    push(@greeting,$component_vals{'surname_1'});
+                }
+                else
+                {
+                    # No title such as 'A_Smith','J_Adam_Smith', so must use default
+                    push(@greeting,$sal_default);
+                }
+            }
+            elsif ( $name->{properties}{number} == 2 )
+            {
+                # a joint name
+                
+                my $type = $name->{properties}{type};
+                if ( $type eq 'Mr_&_Ms_A_Smith' or $type eq 'Mr_A_&_Ms_B_Smith' or $type eq 'Mr_&_Ms_A_&_B_Smith' )
+                {
+                    # common surname
+                    push(@greeting,$component_vals{'title_1'});
+                    push(@greeting,$component_vals{'conjunction_1'});
+                    push(@greeting,$component_vals{'title_2'});
+                    push(@greeting,$component_vals{'surname_1'});
+                    
+                }
+                elsif ( $type eq 'Mr_A_Smith_&_Ms_B_Jones' or $type eq 'Mr_John_Smith_&_Ms_Mary_Jones' )
+                {
+                    push(@greeting,$component_vals{'title_1'});
+                    push(@greeting,$component_vals{'surname_1'});                    
+                    push(@greeting,$component_vals{'conjunction_1'});
+                    push(@greeting,$component_vals{'title_2'});
+                    push(@greeting,$component_vals{'surname_2'});                                        
+                }
+                else
+                {
+                    # No title such as A_Smith_&_B_Jones', 'John_Smith_&_Mary_Jones'
+                    # Must use default
+                    push(@greeting,$sal_default);
+                }
+            }            
+        }                
+    }
+    return(join(' ',@greeting));
 }
 #-------------------------------------------------------------------------------
-# Return all name properties in a hash
+# Return all name properties as a hash
 
 sub properties
 {
-   my $name = shift;
-   return(%{ $name->{properties} });
+    my $name = shift;
+    return(%{ $name->{properties} });
 }
-
 
 #-------------------------------------------------------------------------------
 # Create a text report to standard output listing 
 # - the input string, 
-# - the name of each defined component 
+# - the name of each defined component, if it exists 
 # - any non matching component
 
 sub report
@@ -1011,15 +1089,20 @@ sub report
     my $name = shift;
 
     printf("%-17.17s : %-40.40s\n","Input",$name->{input_string});
-    my %comps = $name->case_components;
-    if ( %comps )
+    
+    my %props = $name->properties;
+    unless ($props{type} eq 'unknown')
     {
-        foreach my $comp ( sort keys %comps)
+        my %comps = $name->case_components;
+        if ( %comps )
         {
-            printf("%-17.17s : %s\n",$comp,$comps{$comp});
+            foreach my $comp ( sort keys %comps)
+            {
+                printf("%-17.17s : %s\n",$comp,$comps{$comp});
+            }
         }
     }
-    my %props = $name->properties;
+
     if ( $props{type} )
     {
         printf("%-17.17s : %-40.40s\n","Name type",$props{type});
@@ -1039,15 +1122,15 @@ sub report
 # Check that common reserved word (as found in company names) do not appear
 sub _pre_parse
 {
-   my $name = shift;
-
-   if ( $name->{input_string} =~ 
-        /\bPty\.? Ltd\.?$|\bLtd\.?$|\bPLC$|Association|Department|National|Society/i )
-   {
-       $name->{error} = 1;
-       $name->{properties}{non_matching} = $name->{input_string};
-   }
-   return($name);
+    my $name = shift;
+    
+    if ( $name->{input_string} =~ 
+         /\bPty\.? Ltd\.?$|\bLtd\.?$|\bPLC$|Association|Department|National|Society/i )
+    {
+        $name->{error} = 1;
+        $name->{properties}{non_matching} = $name->{input_string};
+    }
+    return($name);
 
 }
 #-------------------------------------------------------------------------------
@@ -1056,118 +1139,118 @@ sub _pre_parse
 # 
 sub _assemble
 {
-   my $name = shift;
-
-   my $parsed_name = $name->{parse}->full_name($name->{input_string});
-
-   # Place components into a separate hash, so they can be easily returned
-   # for the user to inspect and modify.
-
-   # For correct matching, the grammar of each component must include the
-   # trailing space that separates it from any following word. This should
-   # now be removed from the components, and will be restored by the
-   # case_all and salutation methods, if called.
-
-   $name->{components}{precursor} = q{};
-   if ( $parsed_name->{precursor} )
-   {
-      $name->{components}{precursor} = &_trim_space($parsed_name->{precursor});
-   }
-
-   $name->{components}{title_1} = q{};
-   if ( $parsed_name->{title_1} )
-   {
-      $name->{components}{title_1} = &_trim_space($parsed_name->{title_1});
-   }
-
-   $name->{components}{title_2} = q{};
-   if ( $parsed_name->{title_2} )
-   {
-      $name->{components}{title_2} = &_trim_space($parsed_name->{title_2});
-   }
-
-   $name->{components}{given_name_1} = q{};
-   if ( $parsed_name->{given_name_1} )
-   {
-      $name->{components}{given_name_1} = &_trim_space($parsed_name->{given_name_1});
-   }
-
-   $name->{components}{given_name_2} = q{};
-   if ( $parsed_name->{given_name_2} )
-   {
-      $name->{components}{given_name_2} = &_trim_space($parsed_name->{given_name_2});
-   }
-
-
-   $name->{components}{middle_name} = q{};
-   if ( $parsed_name->{middle_name} )
-   {
-      $name->{components}{middle_name} = &_trim_space($parsed_name->{middle_name});
-   }
-
-   $name->{components}{initials_1} = q{};
-   if ( $parsed_name->{initials_1} )
-   {
-      $name->{components}{initials_1} = &_trim_space($parsed_name->{initials_1});
-   }
-
-   $name->{components}{initials_2} = q{};
-   if ( $parsed_name->{initials_2} )
-   {
-      $name->{components}{initials_2} = &_trim_space($parsed_name->{initials_2});
-   }
-
-   $name->{components}{conjunction_1} = q{};
-   if ( $parsed_name->{conjunction_1} )
-   {
-      $name->{components}{conjunction_1} = &_trim_space($parsed_name->{conjunction_1});
-   }
-
-   $name->{components}{conjunction_2} = q{};
-   if ( $parsed_name->{conjunction_2} )
-   {
-      $name->{components}{conjunction_2} = &_trim_space($parsed_name->{conjunction_2});
-   }
-
-   $name->{components}{surname_1} = q{};
-   if ( $parsed_name->{surname_1} )
-   {
-      $name->{components}{surname_1} = &_trim_space($parsed_name->{surname_1});
-   }
-
-   $name->{components}{surname_2} = q{};
-   if ( $parsed_name->{surname_2} )
-   {
-      $name->{components}{surname_2} = &_trim_space($parsed_name->{surname_2});
-   }
-
-   $name->{components}{suffix} = q{};
-   if ( $parsed_name->{suffix} )
-   {
-      $name->{components}{suffix} = &_trim_space($parsed_name->{suffix});
-   }
-
-
-   $name->{properties}{non_matching} = q{};
-   if ( $parsed_name->{non_matching} ) 
-   {
-      $name->{properties}{non_matching}  = $parsed_name->{non_matching};
-   }
-
-   $name->{properties}{number} = 0;     
-   $name->{properties}{number} = $parsed_name->{number};
-   $name->{properties}{type}   = $parsed_name->{type};
-
-   return($name);
+    my $name = shift;
+    
+    my $parsed_name = $name->{parse}->full_name($name->{input_string});
+    
+    # Place components into a separate hash, so they can be easily returned
+    # for the user to inspect and modify.
+    
+    # For correct matching, the grammar of each component must include the
+    # trailing space that separates it from any following word. This should
+    # now be removed from the components, and will be restored by the
+    # case_all and salutation methods, if called.
+    
+    $name->{components}{precursor} = q{};
+    if ( $parsed_name->{precursor} )
+    {
+        $name->{components}{precursor} = &_trim_space($parsed_name->{precursor});
+    }
+    
+    $name->{components}{title_1} = q{};
+    if ( $parsed_name->{title_1} )
+    {
+        $name->{components}{title_1} = &_trim_space($parsed_name->{title_1});
+    }
+    
+    $name->{components}{title_2} = q{};
+    if ( $parsed_name->{title_2} )
+    {
+        $name->{components}{title_2} = &_trim_space($parsed_name->{title_2});
+    }
+    
+    $name->{components}{given_name_1} = q{};
+    if ( $parsed_name->{given_name_1} )
+    {
+        $name->{components}{given_name_1} = &_trim_space($parsed_name->{given_name_1});
+    }
+    
+    $name->{components}{given_name_2} = q{};
+    if ( $parsed_name->{given_name_2} )
+    {
+        $name->{components}{given_name_2} = &_trim_space($parsed_name->{given_name_2});
+    }
+    
+    
+    $name->{components}{middle_name} = q{};
+    if ( $parsed_name->{middle_name} )
+    {
+        $name->{components}{middle_name} = &_trim_space($parsed_name->{middle_name});
+    }
+    
+    $name->{components}{initials_1} = q{};
+    if ( $parsed_name->{initials_1} )
+    {
+        $name->{components}{initials_1} = &_trim_space($parsed_name->{initials_1});
+    }
+    
+    $name->{components}{initials_2} = q{};
+    if ( $parsed_name->{initials_2} )
+    {
+        $name->{components}{initials_2} = &_trim_space($parsed_name->{initials_2});
+    }
+    
+    $name->{components}{conjunction_1} = q{};
+    if ( $parsed_name->{conjunction_1} )
+    {
+        $name->{components}{conjunction_1} = &_trim_space($parsed_name->{conjunction_1});
+    }
+    
+    $name->{components}{conjunction_2} = q{};
+    if ( $parsed_name->{conjunction_2} )
+    {
+        $name->{components}{conjunction_2} = &_trim_space($parsed_name->{conjunction_2});
+    }
+    
+    $name->{components}{surname_1} = q{};
+    if ( $parsed_name->{surname_1} )
+    {
+        $name->{components}{surname_1} = &_trim_space($parsed_name->{surname_1});
+    }
+    
+    $name->{components}{surname_2} = q{};
+    if ( $parsed_name->{surname_2} )
+    {
+        $name->{components}{surname_2} = &_trim_space($parsed_name->{surname_2});
+    }
+    
+    $name->{components}{suffix} = q{};
+    if ( $parsed_name->{suffix} )
+    {
+        $name->{components}{suffix} = &_trim_space($parsed_name->{suffix});
+    }
+    
+    
+    $name->{properties}{non_matching} = q{};
+    if ( $parsed_name->{non_matching} ) 
+    {
+        $name->{properties}{non_matching}  = $parsed_name->{non_matching};
+    }
+    
+    $name->{properties}{number} = 0;     
+    $name->{properties}{number} = $parsed_name->{number};
+    $name->{properties}{type}   = $parsed_name->{type};
+    
+    return($name);
 }
 #-------------------------------------------------------------------------------
 # Remove any trailing spaces
 
 sub _trim_space
 {
-   my ($string) = @_;
-   $string =~ s/ $//;
-   return($string);
+    my ($string) = @_;
+    $string =~ s/ $//;
+    return($string);
 }
 #-------------------------------------------------------------------------------
 # Check if any name components have illegal characters, or do not have the
@@ -1176,38 +1259,38 @@ sub _trim_space
 
 sub _validate
 {
-   my $name = shift;
-
-   if ( $name->{properties}{non_matching} )
-   {
-      $name->{error} = 1;
-   }
-   # illegal characters found
-   elsif ( $name->{input_string} =~ /[^A-Za-z\-\'\.,&\/ ]/ )
-   {
-      $name->{error} = 1;
-   }
-   elsif ( not &_valid_name($name->{components}{given_name_1}) )
-   {
-      $name->{error} = 1;
-   }
-   elsif ( not &_valid_name($name->{components}{middle_name}) )
-   {
-      $name->{error} = 1;
-   }
-   
-   elsif ( not &_valid_name($name->{components}{surname_1}) )
-   {
-      $name->{error} = 1;
-   }
-   elsif ( not &_valid_name($name->{components}{surname_2}) )
-   {
-      $name->{error} = 1;
-   }
-   else
-   {
-      $name->{error} = 0;
-   }
+    my $name = shift;
+    
+    if ( $name->{properties}{non_matching} )
+    {
+        $name->{error} = 1;
+    }
+    # illegal characters found
+    elsif ( $name->{input_string} =~ /[^A-Za-z\-\'\.,&\/ ]/ )
+    {
+        $name->{error} = 1;
+    }
+    elsif ( not &_valid_name($name->{components}{given_name_1}) )
+    {
+        $name->{error} = 1;
+    }
+    elsif ( not &_valid_name($name->{components}{middle_name}) )
+    {
+        $name->{error} = 1;
+    }
+    
+    elsif ( not &_valid_name($name->{components}{surname_1}) )
+    {
+        $name->{error} = 1;
+    }
+    elsif ( not &_valid_name($name->{components}{surname_2}) )
+    {
+        $name->{error} = 1;
+    }
+    else
+    {
+        $name->{error} = 0;
+    }
 }
 #-------------------------------------------------------------------------------
 # If the name has an assigned value, check that it contains a vowel sound,
@@ -1216,30 +1299,30 @@ sub _validate
 
 sub _valid_name
 {
-   my ($name) = @_;
-   if ( not $name )
-   {
-      return(1);
-   }
-   # Names should have a vowel sound, 
-   # valid exceptions are Ng, Tsz,Md, Cng,Hng,Chng etc
-   elsif ( $name and $name =~ /[aeiouyj]|^(ng|tsz|md|(c?h|[pts])ng)$/i )
-   {
-      return(1);
-   }
-   else
-   {
-      return(0);
-   }
+    my ($name) = @_;
+    if ( not $name )
+    {
+        return(1);
+    }
+    # Names should have a vowel sound, 
+    # valid exceptions are Ng, Tsz,Md, Cng,Hng,Chng etc
+    elsif ( $name and $name =~ /[aeiouyj]|^(ng|tsz|md|(c?h|[pts])ng)$/i )
+    {
+        return(1);
+    }
+    else
+    {
+        return(0);
+    }
 }
 #-------------------------------------------------------------------------------
 # Upper case first letter, lower case the rest, for all words in string
 sub _case_word
 {
-   my ($word) = @_;
-
-   $word =~ s/(\w+)/\u\L$1/g;
-   return($word);
+    my ($word) = @_;
+    
+    $word =~ s/(\w+)/\u\L$1/g;
+    return($word);
 }
 #-------------------------------------------------------------------------------
 return(1);

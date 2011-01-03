@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------
 
 use strict;
-use Test::Simple tests => 11;
+use Test::Simple tests => 12;
 use Lingua::EN::NameParse qw(clean case_surname);
 
 
@@ -39,15 +39,21 @@ $input = "MR AB MACHLIN & JANE O'BRIEN";
 $name->parse($input);
 ok( $name->case_all eq "Mr AB Machlin & Jane O'Brien" ,'force casing');
 
-# Test salutation
-$input = "DR. A.B.C. FEELGOOD";
-$name->parse($input);
-ok( $name->salutation eq 'Dear Dr. Feelgood' ,'salutation');
-
 # Test default salutation
 $input = "john smith";
 $name->parse($input);
 ok( $name->salutation eq 'Dear Friend' ,'default salutation');
+
+# Test title_plus_surname salutation
+$input = "DR. A.B.C. FEELGOOD";
+$name->parse($input);
+ok( $name->salutation(sal_type => 'title_plus_surname') eq 'Dear Dr. Feelgood' ,'title_plus_surname salutation');
+
+# Test given_name salutation
+$input = "DR ANDREW FEELGOOD";
+$name->parse($input);
+ok( $name->salutation(sal_type => 'given_name') eq 'Dear Andrew' ,'given_name salutation');
+
 
 # Test component extraction
 $input = "Estate Of The Late Lieutenant Colonel AB Van Der Heiden Jnr";

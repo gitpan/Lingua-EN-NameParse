@@ -13,8 +13,6 @@ print("$input :",&case_surname($input,1),"\n\n");
 
 my %args = 
 (
-   salutation      => 'Dear',
-   sal_default     => 'Friend',
    auto_clean      => 1,
    force_case      => 1,
    lc_prefix       => 0,

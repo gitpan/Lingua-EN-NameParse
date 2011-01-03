@@ -1,5 +1,14 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.28 3 Jan 2011
+   Added more extended titles including Pilot Officer, Count, Duke, Dutchess, Marquess (thanks to Hugh Myers)
+   Allowed T-Bone as a given name (thanks to Hugh Myers)
+   Added name type Mr_John_Adam_Smith (thanks to Chris Brown)
+   Allowed joint names to be reverse cased
+   Fixed bug when printing report on name of unknown type
+   Moved saluation paramters from 'new' to 'salutation' method
+   Allowed for two types of salutation, given_name and title_plus_surname
+
 1.27 4 Jul 2010
    Changed my cygwin fstab file to use noacl option for default mount points.
    Before this, the tar tool was creating directories with no read permision.
