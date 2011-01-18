@@ -19,11 +19,11 @@ for more details.
 
 =head1 AUTHOR
 
-NameGrammar was written by Kim Ryan <kimryan at cpan dot org>.
+NameParse::Grammar was written by Kim Ryan <kimryan at cpan dot org>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005 Kim Ryan. All rights reserved.
+Copyright (c) 2011 Kim Ryan. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.4 or,
@@ -35,9 +35,11 @@ at your option, any later version of Perl 5 you may have available.
 =cut
 #------------------------------------------------------------------------------
 
-package Lingua::EN::NameGrammar;
+package Lingua::EN::NameParse::Grammar;
 use strict;
 use warnings;
+
+our $VERSION = '1.29';
 
 
 # Rules that define valid orderings of a names components
@@ -252,6 +254,24 @@ q{
       }
    }
    |
+   
+    precursor(?) title single_initial middle_name surname suffix(?) non_matching(?)
+    {
+       $return =
+       {
+          precursor     => $item[1][0],
+          title_1       => $item[2],
+          initials_1    => $item[3],
+          middle_name   => $item[4],
+          surname_1     => $item[5],
+          suffix        => $item[6][0],
+          non_matching  => $item[7][0],
+          number        => 1,
+          type          => 'Mr_J_Adam_Smith'
+       }
+    }
+    |   
+   
 
 
    precursor(?) title given_name surname suffix(?) non_matching(?)
@@ -359,7 +379,19 @@ q{
          suffix        => $item[4][0],
          non_matching  => $item[5][0],
          number        => 1,
-         type          => 'A_Smith',
+         type          => 'A_Smith'
+      }
+   }
+   |
+   
+   given_name non_matching(?)
+   {
+      $return =
+      {
+         given_name_1  => $item[1],
+         non_matching  => $item[2][0],
+         number        => 1,
+         type          => 'John'
       }
    }
    |
@@ -477,7 +509,7 @@ q{
    /Maj\.? Gen\.?/i       |
    /Major /i              |
    /Maj\.? /i             |
-   /Pilot Officer / i     |
+   /Pilot Officer /i      |
 
 
    # Religious
@@ -517,18 +549,20 @@ my $single_initial = q{ single_initial: /[A-Z]\.? /i };
 # Examples are Jo, Jo-Anne, D'Artagnan, O'Shaugnessy La'Keishia, T-Bone
 my $given_name_min_2 =
 q{
-    given_name: /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i | /T\-Bone/i
+    given_name: /[A-Z]{2,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i | /T\-Bone /i
 };
 
-# Joe ...
+# Joe, Jo-Anne ...
 my $given_name_min_3 =
 q{
-    given_name: /[A-Z]{3,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i | /T\-Bone/i
+    given_name: /[A-Z]{3,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{2,} /i | /T\-Bone /i
 };
 
+
+# John ...
 my $given_name_min_4 =
 q{
-    given_name: /[A-Z]{4,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{3,} /i | /T\-Bone/i
+    given_name: /[A-Z]{4,} /i | /[A-Z]{2,}\-[A-Z]{2,} /i | /[A-Z]{1,}\'[A-Z]{3,} /i | /T\-Bone /i
 };
 
 # For use with John_Adam_Smith and John_A_Smith name types
@@ -664,7 +698,7 @@ q{
       /I{1,3}\b ?/i    # 1st, 2nd, 3rd
 };
 
-# Two or more charaters. This is set to 2 as a work around for the problem
+# Two or more characters. This is set to 2 as a work around for the problem
 # with detecting suffixes like Snr. and Jnr. The dot here gets picked up
 # as non matching.
 

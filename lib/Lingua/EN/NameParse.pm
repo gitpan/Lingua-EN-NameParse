@@ -107,12 +107,13 @@ of the name is used. The following formats are currently supported :
     J_Adam_Smith
     John_Smith
     A_Smith
-
+    John
 
 Precursors and suffixes are only applied to the following formats:
 
     Mr_John_Adam_Smith
     Mr_John_A_Smith
+    Mr_J_Adam_Smith    
     Mr_John_Smith
     Mr_John_Smith
     Mr_A_Smith
@@ -274,7 +275,7 @@ The method returns the entire reverse order cased name as text.
 
 =head2 case_components
 
-   %my_name = $name->components;
+   %my_name = $name->case_components;
    $cased_surname = $my_name{surname_1};
 
 
@@ -391,22 +392,24 @@ non_matching, number and type, as a hash.
 =item type
 
 The type of format a name is in, as one of the following strings:
-
-   Mr_A_Smith_&_Ms_B_Jones
-   Mr_&_Ms_A_&_B_Smith
-   Mr_A_&_Ms_B_Smith
-   Mr_&_Ms_A_Smith
-   Mr_A_&_B_Smith
-   Mr_John_Adam_Smith
-   Mr_John_A_Smith
-   Mr_John_Smith
-   Mr_A_Smith
-   John_Adam_Smith
-   John_A_Smith
-   J_Adam_Smith
-   John_Smith
-   A_Smith
-   unknown
+   
+    Mr_A_Smith_&_Ms_B_Jones
+    Mr_&_Ms_A_&_B_Smith
+    Mr_A_&_Ms_B_Smith
+    Mr_&_Ms_A_Smith
+    Mr_A_&_B_Smith
+    Mr_John_Adam_Smith
+    Mr_John_A_Smith
+    Mr_J_Adam_Smith
+    Mr_John_Smith
+    Mr_A_Smith
+    John_Adam_Smith
+    John_A_Smith
+    J_Adam_Smith
+    John_Smith
+    A_Smith
+    John
+    unknown
 
 
 =item non_matching
@@ -523,7 +526,7 @@ NameParse was written by Kim Ryan <kimryan at cpan dot org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2008 Kim Ryan. All rights reserved.
+Copyright (c) 2011 Kim Ryan. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.4 or,
@@ -539,13 +542,13 @@ package Lingua::EN::NameParse;
 use strict;
 use warnings;
 
-use Lingua::EN::NameGrammar;
+use Lingua::EN::NameParse::Grammar;
 use Parse::RecDescent;
 
 use Exporter;
 use vars qw (@ISA @EXPORT_OK);
 
-our $VERSION   = '1.28';
+our $VERSION = '1.29';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -568,17 +571,10 @@ sub new
     my $current_key;
     foreach my $current_key (keys %args)
     {
-        if ( $current_key eq 'salutation' or $current_key eq 'sal_default' )
-        {
-            $name->{$current_key} = &_case_word($args{$current_key});
-        }
-        else
-        {
-            $name->{$current_key} = $args{$current_key};
-        }
+        $name->{$current_key} = $args{$current_key};
     }
     
-    my $grammar = &Lingua::EN::NameGrammar::_create($name);
+    my $grammar = &Lingua::EN::NameParse::Grammar::_create($name);
     $name->{parse} = new Parse::RecDescent($grammar);
     
     return ($name);
@@ -728,7 +724,8 @@ my %component_order=
     'John_A_Smith'            => ['precursor','given_name_1','initials_1','surname_1','suffix'],
     'J_Adam_Smith'            => ['precursor','initials_1','middle_name','surname_1','suffix'],
     'John_Smith'              => ['precursor','given_name_1','surname_1','suffix'],
-    'A_Smith'                 => ['precursor','initials_1','surname_1','suffix']
+    'A_Smith'                 => ['precursor','initials_1','surname_1','suffix'],
+    'John'                    => ['given_name_1']
 );
 
 # only include names with a single surname
@@ -1065,7 +1062,12 @@ sub salutation
                     push(@greeting,$sal_default);
                 }
             }            
-        }                
+        }
+        else
+        {
+            warn "Invalid sal_type : ", $sal_type;
+            push(@greeting,$sal_default);
+        }
     }
     return(join(' ',@greeting));
 }
@@ -1119,16 +1121,24 @@ sub report
 # PRIVATE METHODS
 
 #-------------------------------------------------------------------------------
-# Check that common reserved word (as found in company names) do not appear
+
 sub _pre_parse
 {
     my $name = shift;
-    
+    # Check that common reserved word (as found in company names) do not appear
     if ( $name->{input_string} =~ 
          /\bPty\.? Ltd\.?$|\bLtd\.?$|\bPLC$|Association|Department|National|Society/i )
     {
         $name->{error} = 1;
         $name->{properties}{non_matching} = $name->{input_string};
+    }
+    
+    # For the case of a single name such as 'Voltaire' we need to add a trailing space
+    # to the input string. This is because the grammar tree expects a terminator (the space)
+    # optionally followed by other productions or non matching text
+   if ( $name->{input_string} =~ /^[A-Z]{2,}(\-)?[A-Z]{0,}$/i )
+    {
+        $name->{input_string} .= ' ';
     }
     return($name);
 
@@ -1141,6 +1151,9 @@ sub _assemble
 {
     my $name = shift;
     
+    # $::RD_TRACE  = 1;  # for debugging RecDescent output
+    # Use Parse::RecDescent to do the parsing. 'full_name' is a label for the complete grammar tree
+    # defined in Lingua::EN::NameParse::Grammar
     my $parsed_name = $name->{parse}->full_name($name->{input_string});
     
     # Place components into a separate hash, so they can be easily returned

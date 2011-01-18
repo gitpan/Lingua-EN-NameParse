@@ -4,7 +4,7 @@ Changes
 Makefile.PL
 examples/demo.pl
 lib/Lingua/EN/NameParse.pm
-lib/Lingua/EN/NameGrammar.pm
+lib/Lingua/EN/NameParse/Grammar.pm
 surname_prefs.txt
 t/main.t
 t/rules.t

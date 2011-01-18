@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------
 
 use strict;
-use Test::Simple tests => 18;
+use Test::Simple tests => 20;
 use Lingua::EN::NameParse;
 
 my %args =
@@ -67,6 +67,11 @@ $name->parse($input);
 %props = $name->properties;
 ok( $props{type} eq 'Mr_John_Adam_Smith', 'Mr_John_Adam_Smith format');
 
+$input = "MR J FITZGERALD KENNEDY";
+$name->parse($input);
+%props = $name->properties;
+ok( $props{type} eq 'Mr_J_Adam_Smith', 'Mr_J_Adam_Smith format');
+
 $input = "MR JOHN F KENNEDY";
 $name->parse($input);
 %props = $name->properties;
@@ -106,5 +111,10 @@ $input = "AB JONES";
 $name->parse($input);
 %props = $name->properties;
 ok( $props{type} eq 'A_Smith', 'A_Smith format');
+
+$input = "Voltaire";
+$name->parse($input);
+%props = $name->properties;
+ok( $props{type} eq 'John', 'John format');
 
 
