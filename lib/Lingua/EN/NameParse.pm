@@ -92,11 +92,16 @@ in peoples names, such as Mr AB McNay.
 To describe the formats supported by NameParse, a short hand representation
 of the name is used. The following formats are currently supported :
 
+    Mr_John_Smith_&_Ms_Mary_Jones
     Mr_A_Smith_&_Ms_B_Jones
     Mr_&_Ms_A_&_B_Smith
     Mr_A_&_Ms_B_Smith
     Mr_&_Ms_A_Smith
     Mr_A_&_B_Smith
+    John_Smith_&_Mary_Jones
+    John_&_Mary_Smith
+    A_Smith_&_B_Jones
+    
     Mr_John_Adam_Smith
     Mr_John_A_Smith
     Mr_J_Adam_Smith
@@ -109,19 +114,8 @@ of the name is used. The following formats are currently supported :
     A_Smith
     John
 
-Precursors and suffixes are only applied to the following formats:
+Precursors and suffixes may be applied to single names that include a surname
 
-    Mr_John_Adam_Smith
-    Mr_John_A_Smith
-    Mr_J_Adam_Smith    
-    Mr_John_Smith
-    Mr_John_Smith
-    Mr_A_Smith
-    John_Adam_Smith
-    John_A_Smith
-    J_Adam_Smith
-    John_Smith
-    A_Smith
 
 
 =head1 METHODS
@@ -435,6 +429,7 @@ ambiguities, which have no right answer.
    Macbeth or MacBeth, are both valid spellings
    Is ED WOOD E.D. Wood or Edward Wood
    Is 'Mr Rapid Print' a name or a company
+   Does  John Bradfield Smith have a middle name of Bradfield, or a surname of Bradfield-Smith?
 
 One approach is to have large lookup files of names and words, statistical rules
 and fuzzy logic to attempt to derive context. This approach gives high levels of
@@ -480,10 +475,6 @@ Data Dictionary for transfer of street addressing information"
    Add transforming methods to do things like remove dots from initials
    Try to derive gender (Mr... is male, Ms, Mrs... is female)
 
-Let the user select what level of complexity of grammar they need for
-their data. For example, if you know most of your names are in a "John Smith"
-format, you can avoid the ambiguity between two letter given names and
-initials. Using a limited grammar subset will also be much faster.
 
 Define grammar for other languages. Hopefully, all that would be needed is
 to specify a new module with its own grammar, and inherit all the existing
@@ -529,12 +520,9 @@ NameParse was written by Kim Ryan <kimryan at cpan dot org>
 Copyright (c) 2011 Kim Ryan. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.4 or,
-at your option, any later version of Perl 5 you may have available.
-
+it under the same terms as Perl itself.
 
 =cut
-
 #-------------------------------------------------------------------------------
 
 package Lingua::EN::NameParse;
@@ -548,7 +536,7 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK);
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(&clean &case_surname);
 
@@ -716,8 +704,9 @@ my %component_order=
     'John_&_Mary_Smith'       => ['given_name_1','conjunction_1','given_name_2','surname_1'],
     'A_Smith_&_B_Jones'       => ['initials_1','surname_1','conjunction_1','initials_2','surname_2'],
 
-    'Mr_John_Adam_Smith'      => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
+    'Mr_John_Adam_Smith'      => ['precursor','title_1','given_name_1','middle_name','surname_1','suffix'],
     'Mr_John_A_Smith'         => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
+    'Mr_J_Adam_Smith'         => ['precursor','title_1','initials_1','middle_name','surname_1','suffix'],    
     'Mr_John_Smith'           => ['precursor','title_1','given_name_1','surname_1','suffix'],
     'Mr_A_Smith'              => ['precursor','title_1','initials_1','surname_1','suffix'],
     'John_Adam_Smith'         => ['precursor','given_name_1','middle_name','surname_1','suffix'],
@@ -728,19 +717,21 @@ my %component_order=
     'John'                    => ['given_name_1']
 );
 
+
 # only include names with a single surname
 my %reverse_component_order=
 (
    'Mr_&_Ms_A_&_B_Smith'  => ['surname_1','title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2'],
    'Mr_A_&_Ms_B_Smith'    => ['surname_1','title_1','initials_1','conjunction_1','title_2','initials_2'],
-   'Mr_&_Ms_A_Smith'      => ['surname_1','title_1','conjunction_1','title_2','initials_1'],    
-   'Mr_A_&_B_Smith'       => ['surname_1','initials_1','conjunction_1','initials_2'],
+   'Mr_&_Ms_A_Smith'      => ['surname_1','title_1','title_1','conjunction_1','title_2','initials_1'],    
+   'Mr_A_&_B_Smith'       => ['surname_1','title_1','initials_1','conjunction_1','initials_2'],
    'John_&_Mary_Smith'    => ['surname_1','given_name_1','conjunction_1','given_name_2'],
    
-   'Mr_John_Adam_Smith'   => ['surname_1','given_name_1','middle_name','suffix'],
-   'Mr_John_A_Smith'      => ['surname_1','given_name_1','initials_1','suffix'],
-   'Mr_John_Smith'        => ['surname_1','given_name_1','suffix'],
-   'Mr_A_Smith'           => ['surname_1','initials_1','suffix'],
+   'Mr_John_Adam_Smith'   => ['surname_1','title_1','given_name_1','middle_name','suffix'],
+   'Mr_John_A_Smith'      => ['surname_1','title_1','given_name_1','initials_1','suffix'],
+   'Mr_J_Adam_Smith'      => ['surname_1','title_1','initials_1','middle_name','suffix'],   
+   'Mr_John_Smith'        => ['surname_1','title_1','given_name_1','suffix'],
+   'Mr_A_Smith'           => ['surname_1','title_1','initials_1','suffix'],
    'John_Adam_Smith'      => ['surname_1','given_name_1','middle_name','suffix'],
    'John_A_Smith'         => ['surname_1','given_name_1','initials_1','suffix'],
    'J_Adam_Smith'         => ['surname_1','initials_1','middle_name','suffix'],

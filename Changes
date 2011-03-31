@@ -1,5 +1,10 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.30 31 Marr 2011
+    Added component ordering for Mr_J_Adam_Smith name type, thanks to John Hansen
+    Corrected some of the documentation
+    Added more military titles
+
 1.29 23 Jan 2011
    Corrected documentation of case_components module, thanks to John Hansen
    Removed invalid space after /Pilot Officer/ in extended titles grammar, thanks to John Hansen

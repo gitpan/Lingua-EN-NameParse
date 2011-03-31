@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Lingua-EN-NameParse
-version:            1.29
+version:            1.30
 abstract:           Manipulate peoples names, titles and initials
 author:
     - Kim Ryan

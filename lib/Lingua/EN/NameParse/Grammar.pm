@@ -26,10 +26,7 @@ NameParse::Grammar was written by Kim Ryan <kimryan at cpan dot org>.
 Copyright (c) 2011 Kim Ryan. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.4 or,
-at your option, any later version of Perl 5 you may have available.
-
-
+it under the same terms as Perl itself.
 
 
 =cut
@@ -39,7 +36,7 @@ package Lingua::EN::NameParse::Grammar;
 use strict;
 use warnings;
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 
 
 # Rules that define valid orderings of a names components
@@ -447,12 +444,13 @@ q{
    
 my $extended_titles =
 q{
-                       |
-   /Messrs /i          |   # plural or Mr
-   /Mme\.? /i          |   # Madame
+                       | # contiues from titles above
+   /Messrs /i          | # plural or Mr
+   /Madam(e)? /i       |
+   /Mme\.? /i          | # Madame
    /Mister /i          |
    /Mast(\.|er)? /i    |
-   /Ms?gr\.? /i        |   # Monsignor
+   /Ms?gr\.? /i        | # Monsignor
    /Count /i           |
    /Countess /i        |   
    /Duke /i            |
@@ -460,8 +458,6 @@ q{
    /Lord /i            |
    /Lady /i            |
    /Marquess i/        |
-
-   /Madam(e)? /i       |
 
    # Medical
    /Doctor /i          |
@@ -477,60 +473,62 @@ q{
    /Insp\.? /i         |
 
    # Military
-   /Brig(adier)? /i       |
-   /Captain /i            |
-   /Capt\.? /i            |
-   /Colonel /i            |
-   /Col\.? /i             |
-   /Commander /i          |
-   /Commodore /i          |
-   /Cdr\.? /i             |   # Commander, Commodore
-   /Field Marshall /i     |
-   /Fl\.? Off\.? /i       |
-   /Flight Officer /i     |
-   /Flt Lt /i             |
-   /Flight Lieutenant /i  |
-   /Gen(\.|eral)? /i      |
-   /Gen\. /i              |
-   /Pte\. /i              |
-   /Private /i            |
-   /Sgt\.? /i             |
-   /Sargent /i            |
-   /Air Commander /i      |
-   /Air Commodore /i      |
-   /Air Marshall /i       |
-   /Lieutenant Colonel /i |
-   /Lt\.? Col\.? /i       |
-   /Lt\.? Gen\.? /i       |
-   /Lt\.? Cdr\.? /i       |
-   /Lieutenant /i         |
-   /(Lt|Leut|Lieut)\.? /i |
-   /Major General /i      |
-   /Maj\.? Gen\.?/i       |
-   /Major /i              |
-   /Maj\.? /i             |
-   /Pilot Officer /i      |
+   /Brig(adier)? /i         |
+   /Captain /i              |
+   /Capt\.? /i              |
+   /Colonel /i              |
+   /Col\.? /i               |
+   /Commander in Chief /i   |
+   /Commander /i            |
+   /Commodore /i            |
+   /Cdr\.? /i               |   # Commander, Commodore
+   /Field Marshall /i       |
+   /Fl\.? Off\.? /i         |
+   /Flight Officer /i       |
+   /Flt Lt /i               |
+   /Flight Lieutenant /i    |
+   /General of the Army /i  |
+   /Gen(\.|eral)? /i        |
+   /Gen\. /i                |
+   /Pte\. /i                |
+   /Private /i              |
+   /Sgt\.? /i               |
+   /Sargent /i              |
+   /Air Commander /i        |
+   /Air Commodore /i        |
+   /Air Marshall /i         |
+   /Lieutenant Colonel /i   |
+   /Lt\.? Col\.? /i         |
+   /Lt\.? Gen\.? /i         |
+   /Lt\.? Cdr\.? /i         |
+   /Lieutenant /i           |
+   /(Lt|Leut|Lieut)\.? /i   |
+   /Major General /i        |
+   /Maj\.? Gen\.?/i         |
+   /Major /i                |
+   /Maj\.? /i               |
+   /Pilot Officer /i        |
 
 
    # Religious
-   /Rabbi /i              |
-   /Bishop /i             |
-   /Brother /i            |
-   /Chaplain /i           |
-   /Father /i             |
-   /Pastor /i             |
-   /Mother Superior /i    |
-   /Mother /i             |
-   /Most Rever[e|a]nd /i  |
-   /Very Rever[e|a]nd /i  |
-   /Rever[e|a]nd /i       |
-   /Mt\.? Revd\.? /i      |
-   /V\.? Revd?\.? /i      |
-   /Revd?\.? /i           |
+   /Rabbi /i             |
+   /Bishop /i            |
+   /Brother /i           |
+   /Chaplain /i          |
+   /Father /i            |
+   /Pastor /i            |
+   /Mother Superior /i   |
+   /Mother /i            |
+   /Most Rever[e|a]nd /i |
+   /Very Rever[e|a]nd /i |
+   /Rever[e|a]nd /i      |
+   /Mt\.? Revd\.? /i     |
+   /V\.? Revd?\.? /i     |
+   /Revd?\.? /i          |
 
 
    # Other
-   /Prof(\.|essor)? /i    |
+   /Prof(\.|essor)? /i   |
    /Ald(\.|erman)? /i
 };
 
