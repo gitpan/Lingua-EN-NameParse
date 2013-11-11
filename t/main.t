@@ -12,7 +12,7 @@ my $input;
 
 # Test case_surname subroutine
 $input = "BIG BROTHER & THE HOLDING COMPANY";
-ok(&case_surname($input) eq 'Big Brother & The Holding Company','case_surname');
+ok(case_surname($input) eq 'Big Brother & The Holding Company','case_surname');
 
 my %args =
 (
@@ -80,18 +80,14 @@ ok( $props{non_matching} eq '& Associates','non matching');
 
 # Test cleaning
 $input = '   Bad Na89me!';
-ok( &clean($input) eq 'Bad Name','cleaning');
+ok( clean($input) eq 'Bad Name','cleaning');
 
 # Test reverse order names
 $input = "de silva, m/s de";
 $name->parse($input);
 %props = $name->properties;
-ok( $props{type} eq 'Mr_A_Smith','reverse order'); 
+ok( $props{type} eq 'Mr_A_Smith','reverse order');
 
 my $lc_prefix = 1;
 # Test lower casing of surname prefix
-ok( &case_surname("DE SILVA-O'SULLIVAN",$lc_prefix) eq "de Silva-O'Sullivan" ,'lower casing of surname prefix');
-
-
-
-
+ok( case_surname("DE SILVA-O'SULLIVAN",$lc_prefix) eq "de Silva-O'Sullivan" ,'lower casing of surname prefix');

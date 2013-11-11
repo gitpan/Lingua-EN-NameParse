@@ -9,9 +9,9 @@ use strict;
 # Quick casing, no parsing or context check
 my $input = "FRENCH'S";
 
-print("$input :",&case_surname($input,1),"\n\n");
+print("$input :",case_surname($input,1),"\n\n");
 
-my %args = 
+my %args =
 (
    auto_clean      => 1,
    force_case      => 1,
@@ -20,11 +20,11 @@ my %args =
    allow_reversed  => 1,
    joint_names     => 1,
    extended_titles => 1,
-     
+
 );
 
-my $name = new Lingua::EN::NameParse(%args); 
-# Open files to contain errors, a report on data quality and 
+my $name = new Lingua::EN::NameParse(%args);
+# Open files to contain errors, a report on data quality and
 # an extract of all single names
 open(ERROR_FH,">errors.txt");
 open(REPORT_FH,">report.txt");

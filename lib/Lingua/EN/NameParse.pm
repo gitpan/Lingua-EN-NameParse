@@ -37,7 +37,7 @@ Lingua::EN::NameParse - routines for manipulating a person's name
 
         $correct_casing = $name->case_all_reversed ; # de Silva, AC
 
-        $good_name = &clean("Bad Na9me   "); # "Bad Name"
+        $good_name = clean("Bad Na9me   "); # "Bad Name"
 
         $salutation = $name->salutation(salutation => 'Dear',sal_default => 'Friend')); # Dear Mr de Silva
 
@@ -48,7 +48,7 @@ Lingua::EN::NameParse - routines for manipulating a person's name
     $name->report; # create a report listing all information about the parsed name
 
     $lc_prefix = 0;
-    $correct_case = &case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
+    $correct_case = case_surname("DE SILVA-MACNAY",$lc_prefix); # De Silva-MacNay
 
 
 
@@ -101,15 +101,15 @@ in peoples names, such as Mr AB McNay.
 To describe the formats supported by NameParse, a short hand representation
 of the name is used. The following formats are currently supported :
 
-    Mr_John_Smith_&_Ms_Mary_Jones
-    Mr_A_Smith_&_Ms_B_Jones
-    Mr_&_Ms_A_&_B_Smith
-    Mr_A_&_Ms_B_Smith
-    Mr_&_Ms_A_Smith
-    Mr_A_&_B_Smith
-    John_Smith_&_Mary_Jones
-    John_&_Mary_Smith
-    A_Smith_&_B_Jones
+    Mr_John_Smith_&Ms_Mary_Jones
+    Mr_A_Smith_&Ms_B_Jones
+    Mr_&Ms_A_&B_Smith
+    Mr_A_&Ms_B_Smith
+    Mr_&Ms_A_Smith
+    Mr_A_&B_Smith
+    John_Smith_&Mary_Jones
+    John_&Mary_Smith
+    A_Smith_&B_Jones
 
     Mr_John_Adam_Smith
     Mr_John_A_Smith
@@ -206,11 +206,11 @@ name object.
 
 When this option is set to a positive value, joint names are accounted for:
 
-Mr_A_Smith_&_Ms_B_Jones
-Mr_&_Ms_A_&_B_Smith
-Mr_A_&_Ms_B_Smith
-Mr_&_Ms_A_Smith
-Mr_A_&_B_Smith
+Mr_A_Smith_&Ms_B_Jones
+Mr_&Ms_A_&B_Smith
+Mr_A_&Ms_B_Smith
+Mr_&Ms_A_Smith
+Mr_A_&B_Smith
 
 Note that if this option is not specified, than by default joint names are
 ignored. Disabling joint names speeds up the processing a lot.
@@ -319,7 +319,7 @@ conversion.
 
 =head2 case_surname
 
-   $correct_casing = &case_surname("DE SILVA-MACNAY" [,$lc_prefix]);
+   $correct_casing = case_surname("DE SILVA-MACNAY" [,$lc_prefix]);
 
 C<case_surname> is a stand alone function that does not require a name
 object. The input is a text string. An optional input argument controls the
@@ -380,7 +380,7 @@ If the name contains a precursor, a default salutation is produced.
 
 =head2 clean
 
-   $good_name = &clean("Bad Na9me");
+   $good_name = clean("Bad Na9me");
 
 C<clean> is a stand alone function that does not require a name object.
 The input is a text string and the output is the string with:
@@ -400,11 +400,11 @@ non_matching, number and type, as a hash.
 
 The type of format a name is in, as one of the following strings:
 
-    Mr_A_Smith_&_Ms_B_Jones
-    Mr_&_Ms_A_&_B_Smith
-    Mr_A_&_Ms_B_Smith
-    Mr_&_Ms_A_Smith
-    Mr_A_&_B_Smith
+    Mr_A_Smith_&Ms_B_Jones
+    Mr_&Ms_A_&B_Smith
+    Mr_A_&Ms_B_Smith
+    Mr_&Ms_A_Smith
+    Mr_A_&B_Smith
     Mr_John_Adam_Smith
     Mr_John_A_Smith
     Mr_J_Adam_Smith
@@ -549,9 +549,9 @@ use Parse::RecDescent;
 use Exporter;
 use vars qw (@ISA @EXPORT_OK);
 
-our $VERSION = '1.31';
+our $VERSION = '1.32';
 @ISA       = qw(Exporter);
-@EXPORT_OK = qw(&clean &case_surname);
+@EXPORT_OK = qw(clean case_surname);
 
 #-------------------------------------------------------------------------------
 # Create a new instance of a name parsing object. This step is time consuming
@@ -575,7 +575,7 @@ sub new
         $name->{$current_key} = $args{$current_key};
     }
 
-    my $grammar = &Lingua::EN::NameParse::Grammar::_create($name);
+    my $grammar = Lingua::EN::NameParse::Grammar::_create($name);
     $name->{parse} = new Parse::RecDescent($grammar);
 
     return ($name);
@@ -609,17 +609,17 @@ sub parse
 
     $name->{input_string} = $input_string;
 
-    $name = &_pre_parse($name);
+    $name = _pre_parse($name);
     unless ( $name->{error} )
     {
-        $name = &_assemble($name);
-        &_validate($name);
+        $name = _assemble($name);
+        _validate($name);
 
         if ( $name->{error} and $name->{auto_clean} )
         {
-            $name->{input_string} = &clean($name->{input_string});
-            $name = &_assemble($name);
-            &_validate($name);
+            $name->{input_string} = clean($name->{input_string});
+            $name = _assemble($name);
+            _validate($name);
         }
     }
 
@@ -691,11 +691,11 @@ sub case_components
             }
             elsif ( $current_key =~ /surname|suffix/ )
             {
-               $cased_value = &case_surname($orig_components{$current_key},$name->{lc_prefix});
+               $cased_value = case_surname($orig_components{$current_key},$name->{lc_prefix});
             }
             else
             {
-                $cased_value = &_case_word($orig_components{$current_key});
+                $cased_value = _case_word($orig_components{$current_key});
             }
 
             $cased_components{$current_key} = $cased_value;
@@ -713,15 +713,15 @@ sub case_components
 
 my %component_order=
 (
-    'Mr_John_Smith_&_Ms_Mary_Jones' => ['title_1','given_name_1','surname_1','conjunction_1','title_2','given_name_2','surname_2'],
-    'Mr_A_Smith_&_Ms_B_Jones' => ['title_1','initials_1','surname_1','conjunction_1','title_2','initials_2','surname_2'],
-    'Mr_&_Ms_A_&_B_Smith'     => ['title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2','surname_1'],
-    'Mr_A_&_Ms_B_Smith'       => ['title_1','initials_1','conjunction_1','title_2','initials_2','surname_1'],
-    'Mr_&_Ms_A_Smith'         => ['title_1','conjunction_1','title_2','initials_1','surname_1'],
-    'Mr_A_&_B_Smith'          => ['title_1','initials_1','conjunction_1','initials_2','surname_1'],
-    'John_Smith_&_Mary_Jones' => ['given_name_1','surname_1','conjunction_1','given_name_2','surname_2'],
-    'John_&_Mary_Smith'       => ['given_name_1','conjunction_1','given_name_2','surname_1'],
-    'A_Smith_&_B_Jones'       => ['initials_1','surname_1','conjunction_1','initials_2','surname_2'],
+    'Mr_John_Smith_&Ms_Mary_Jones' => ['title_1','given_name_1','surname_1','conjunction_1','title_2','given_name_2','surname_2'],
+    'Mr_A_Smith_&Ms_B_Jones' => ['title_1','initials_1','surname_1','conjunction_1','title_2','initials_2','surname_2'],
+    'Mr_&Ms_A_&B_Smith'     => ['title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2','surname_1'],
+    'Mr_A_&Ms_B_Smith'       => ['title_1','initials_1','conjunction_1','title_2','initials_2','surname_1'],
+    'Mr_&Ms_A_Smith'         => ['title_1','conjunction_1','title_2','initials_1','surname_1'],
+    'Mr_A_&B_Smith'          => ['title_1','initials_1','conjunction_1','initials_2','surname_1'],
+    'John_Smith_&Mary_Jones' => ['given_name_1','surname_1','conjunction_1','given_name_2','surname_2'],
+    'John_&Mary_Smith'       => ['given_name_1','conjunction_1','given_name_2','surname_1'],
+    'A_Smith_&B_Jones'       => ['initials_1','surname_1','conjunction_1','initials_2','surname_2'],
 
     'Mr_John_Adam_Smith'      => ['precursor','title_1','given_name_1','middle_name','surname_1','suffix'],
     'Mr_John_A_Smith'         => ['precursor','title_1','given_name_1','initials_1','surname_1','suffix'],
@@ -740,11 +740,11 @@ my %component_order=
 # only include names with a single surname
 my %reverse_component_order=
 (
-   'Mr_&_Ms_A_&_B_Smith'  => ['surname_1','title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2'],
-   'Mr_A_&_Ms_B_Smith'    => ['surname_1','title_1','initials_1','conjunction_1','title_2','initials_2'],
-   'Mr_&_Ms_A_Smith'      => ['surname_1','title_1','title_1','conjunction_1','title_2','initials_1'],
-   'Mr_A_&_B_Smith'       => ['surname_1','title_1','initials_1','conjunction_1','initials_2'],
-   'John_&_Mary_Smith'    => ['surname_1','given_name_1','conjunction_1','given_name_2'],
+   'Mr_&Ms_A_&B_Smith'  => ['surname_1','title_1','conjunction_1','title_2','initials_1','conjunction_1','initials_2'],
+   'Mr_A_&Ms_B_Smith'    => ['surname_1','title_1','initials_1','conjunction_1','title_2','initials_2'],
+   'Mr_&Ms_A_Smith'      => ['surname_1','title_1','title_1','conjunction_1','title_2','initials_1'],
+   'Mr_A_&B_Smith'       => ['surname_1','title_1','initials_1','conjunction_1','initials_2'],
+   'John_&Mary_Smith'    => ['surname_1','given_name_1','conjunction_1','given_name_2'],
 
    'Mr_John_Adam_Smith'   => ['surname_1','title_1','given_name_1','middle_name','suffix'],
    'Mr_John_A_Smith'      => ['surname_1','title_1','given_name_1','initials_1','suffix'],
@@ -799,7 +799,7 @@ sub case_all
        # Despite errors, try to name case non-matching section. As the format
        # of this section is unknown, surname case will provide the best
        # approximation, but still fail on initials of more than 1 letter
-       push(@cased_name,&case_surname($name->{properties}{non_matching},$name->{lc_prefix}));
+       push(@cased_name,case_surname($name->{properties}{non_matching},$name->{lc_prefix}));
     }
 
     return(join(' ',@cased_name));
@@ -814,8 +814,8 @@ Useful for creating a list of names that can be sorted by surname.
 
 If name type is unknown , returns null
 
-If the name type has a joint name, such as 'Mr_A_Smith_&_Ms_B_Jones', return null,
-as it is ambigious which surname to place at the start of the string
+If the name type has a joint name, such as 'Mr_A_Smith_Ms_B_Jones', return null,
+as it is ambiguous which surname to place at the start of the string
 
 Else, returns a string of all cased components in correct reversed order
 
@@ -888,6 +888,11 @@ BEGIN
 sub case_surname
 {
     my ($surname,$lc_prefix) = @_;
+
+    unless ($surname)
+    {
+        return;
+    }
 
     # If the user has specified a preferred capitalisation for this
     # surname in the surname_prefs.txt, it should be returned now.
@@ -1048,7 +1053,7 @@ sub salutation
                 # a joint name
 
                 my $type = $name->{properties}{type};
-                if ( $type eq 'Mr_&_Ms_A_Smith' or $type eq 'Mr_A_&_Ms_B_Smith' or $type eq 'Mr_&_Ms_A_&_B_Smith' )
+                if ( $type eq 'Mr_&Ms_A_Smith' or $type eq 'Mr_A_&Ms_B_Smith' or $type eq 'Mr_&Ms_A_&B_Smith' )
                 {
                     # common surname
                     push(@greeting,$component_vals{'title_1'});
@@ -1057,7 +1062,7 @@ sub salutation
                     push(@greeting,$component_vals{'surname_1'});
 
                 }
-                elsif ( $type eq 'Mr_A_Smith_&_Ms_B_Jones' or $type eq 'Mr_John_Smith_&_Ms_Mary_Jones' )
+                elsif ( $type eq 'Mr_A_Smith_&Ms_B_Jones' or $type eq 'Mr_John_Smith_&Ms_Mary_Jones' )
                 {
                     push(@greeting,$component_vals{'title_1'});
                     push(@greeting,$component_vals{'surname_1'});
@@ -1067,7 +1072,7 @@ sub salutation
                 }
                 else
                 {
-                    # No title such as A_Smith_&_B_Jones', 'John_Smith_&_Mary_Jones'
+                    # No title such as A_Smith_&B_Jones', 'John_Smith_&Mary_Jones'
                     # Must use default
                     push(@greeting,$sal_default);
                 }
@@ -1177,80 +1182,80 @@ sub _assemble
     $name->{components}{precursor} = q{};
     if ( $parsed_name->{precursor} )
     {
-        $name->{components}{precursor} = &_trim_space($parsed_name->{precursor});
+        $name->{components}{precursor} = _trim_space($parsed_name->{precursor});
     }
 
     $name->{components}{title_1} = q{};
     if ( $parsed_name->{title_1} )
     {
-        $name->{components}{title_1} = &_trim_space($parsed_name->{title_1});
+        $name->{components}{title_1} = _trim_space($parsed_name->{title_1});
     }
 
     $name->{components}{title_2} = q{};
     if ( $parsed_name->{title_2} )
     {
-        $name->{components}{title_2} = &_trim_space($parsed_name->{title_2});
+        $name->{components}{title_2} = _trim_space($parsed_name->{title_2});
     }
 
     $name->{components}{given_name_1} = q{};
     if ( $parsed_name->{given_name_1} )
     {
-        $name->{components}{given_name_1} = &_trim_space($parsed_name->{given_name_1});
+        $name->{components}{given_name_1} = _trim_space($parsed_name->{given_name_1});
     }
 
     $name->{components}{given_name_2} = q{};
     if ( $parsed_name->{given_name_2} )
     {
-        $name->{components}{given_name_2} = &_trim_space($parsed_name->{given_name_2});
+        $name->{components}{given_name_2} = _trim_space($parsed_name->{given_name_2});
     }
 
 
     $name->{components}{middle_name} = q{};
     if ( $parsed_name->{middle_name} )
     {
-        $name->{components}{middle_name} = &_trim_space($parsed_name->{middle_name});
+        $name->{components}{middle_name} = _trim_space($parsed_name->{middle_name});
     }
 
     $name->{components}{initials_1} = q{};
     if ( $parsed_name->{initials_1} )
     {
-        $name->{components}{initials_1} = &_trim_space($parsed_name->{initials_1});
+        $name->{components}{initials_1} = _trim_space($parsed_name->{initials_1});
     }
 
     $name->{components}{initials_2} = q{};
     if ( $parsed_name->{initials_2} )
     {
-        $name->{components}{initials_2} = &_trim_space($parsed_name->{initials_2});
+        $name->{components}{initials_2} = _trim_space($parsed_name->{initials_2});
     }
 
     $name->{components}{conjunction_1} = q{};
     if ( $parsed_name->{conjunction_1} )
     {
-        $name->{components}{conjunction_1} = &_trim_space($parsed_name->{conjunction_1});
+        $name->{components}{conjunction_1} = _trim_space($parsed_name->{conjunction_1});
     }
 
     $name->{components}{conjunction_2} = q{};
     if ( $parsed_name->{conjunction_2} )
     {
-        $name->{components}{conjunction_2} = &_trim_space($parsed_name->{conjunction_2});
+        $name->{components}{conjunction_2} = _trim_space($parsed_name->{conjunction_2});
     }
 
     $name->{components}{surname_1} = q{};
     if ( $parsed_name->{surname_1} )
     {
-        $name->{components}{surname_1} = &_trim_space($parsed_name->{surname_1});
+        $name->{components}{surname_1} = _trim_space($parsed_name->{surname_1});
     }
 
     $name->{components}{surname_2} = q{};
     if ( $parsed_name->{surname_2} )
     {
-        $name->{components}{surname_2} = &_trim_space($parsed_name->{surname_2});
+        $name->{components}{surname_2} = _trim_space($parsed_name->{surname_2});
     }
 
     $name->{components}{suffix} = q{};
     if ( $parsed_name->{suffix} )
     {
-        $name->{components}{suffix} = &_trim_space($parsed_name->{suffix});
+        $name->{components}{suffix} = _trim_space($parsed_name->{suffix});
     }
 
 
@@ -1293,20 +1298,20 @@ sub _validate
     {
         $name->{error} = 1;
     }
-    elsif ( not &_valid_name($name->{components}{given_name_1}) )
+    elsif ( not _valid_name($name->{components}{given_name_1}) )
     {
         $name->{error} = 1;
     }
-    elsif ( not &_valid_name($name->{components}{middle_name}) )
+    elsif ( not _valid_name($name->{components}{middle_name}) )
     {
         $name->{error} = 1;
     }
 
-    elsif ( not &_valid_name($name->{components}{surname_1}) )
+    elsif ( not _valid_name($name->{components}{surname_1}) )
     {
         $name->{error} = 1;
     }
-    elsif ( not &_valid_name($name->{components}{surname_2}) )
+    elsif ( not _valid_name($name->{components}{surname_2}) )
     {
         $name->{error} = 1;
     }

@@ -1,9 +1,13 @@
 Revision history for Perl CPAN module Lingua::En::NameParse
 
+1.32 11 Nov 2013
+    Removed &s from start of subroutine calls (obsolete syntax)
+    Fixed typo RT bug 88573
+    case_surname does not process undefined or blank input, stops warning message occuring
+
 1.31 24 Jun 2013
     Wherever program returned 'undef' changed to just a return statement, fix for RT bug 85491
     Added error handling to synopsis examples
-
 
 1.30 31 Mar 2011
     Added component ordering for Mr_J_Adam_Smith name type, thanks to John Hansen

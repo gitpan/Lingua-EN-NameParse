@@ -8,7 +8,7 @@ Internal functions called from NameParse.pm module
 
 =head1 DESCRIPTION
 
-Grammar tree of personal name syntax for Lingua::EN::NameParse module.
+Grammar tree of personal name syntax for <Lingua::EN::NameParse> module.
 
 The grammar defined here is for use with the Parse::RecDescent module.
 Note that parsing is done depth first, meaning match the shortest string first.
@@ -23,7 +23,7 @@ NameParse::Grammar was written by Kim Ryan <kimryan at cpan dot org>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2011 Kim Ryan. All rights reserved.
+Copyright (c) 2013 Kim Ryan. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -36,7 +36,7 @@ package Lingua::EN::NameParse::Grammar;
 use strict;
 use warnings;
 
-our $VERSION = '1.30';
+our $VERSION = '1.32';
 
 
 # Rules that define valid orderings of a names components
@@ -251,7 +251,7 @@ q{
       }
    }
    |
-   
+
     precursor(?) title single_initial middle_name surname suffix(?) non_matching(?)
     {
        $return =
@@ -267,8 +267,8 @@ q{
           type          => 'Mr_J_Adam_Smith'
        }
     }
-    |   
-   
+    |
+
 
 
    precursor(?) title given_name surname suffix(?) non_matching(?)
@@ -334,7 +334,7 @@ q{
       }
    }
    |
-   
+
    precursor(?) single_initial middle_name surname suffix(?) non_matching(?)
    {
       $return =
@@ -349,7 +349,7 @@ q{
          type          => 'J_Adam_Smith'
       }
    }
-   |   
+   |
 
    precursor(?) given_name surname suffix(?) non_matching(?)
    {
@@ -380,7 +380,7 @@ q{
       }
    }
    |
-   
+
    given_name non_matching(?)
    {
       $return =
@@ -411,7 +411,7 @@ q{
 my $precursors =
 q
 {
-    precursor : 
+    precursor :
 
     /Estate Of (The Late )?/i |
     /His (Excellency|Honou?r) /i |
@@ -438,10 +438,10 @@ q{
 
    /Dr\.? /i           |
    /Sir /i             |
-   /Dame /i            
+   /Dame /i
 
 };
-   
+
 my $extended_titles =
 q{
                        | # contiues from titles above
@@ -452,7 +452,7 @@ q{
    /Mast(\.|er)? /i    |
    /Ms?gr\.? /i        | # Monsignor
    /Count /i           |
-   /Countess /i        |   
+   /Countess /i        |
    /Duke /i            |
    /Duchess /i         |
    /Lord /i            |
@@ -534,9 +534,9 @@ q{
 
 my $conjunction = q{ conjunction : /And |& /i };
 
-# Used in the John_A_Smith and J_Adam_Smith name types. Although this 
-# duplicates $initials_1, it is needed because this type of initial must 
-# always be one character long, regardless of the length of initials set 
+# Used in the John_A_Smith and J_Adam_Smith name types. Although this
+# duplicates $initials_1, it is needed because this type of initial must
+# always be one character long, regardless of the length of initials set
 # by the user in the 'new' method.
 my $single_initial = q{ single_initial: /[A-Z]\.? /i };
 
@@ -590,11 +590,11 @@ q{
 };
 
 
-# Jo, Jo-Anne, La'Keishia, D'Artagnan, O'Shaugnessy 
+# Jo, Jo-Anne, La'Keishia, D'Artagnan, O'Shaugnessy
 my $middle_name =
 q{
-   middle_name: 
-   
+   middle_name:
+
    # Dont grab surname prefix too early. For example, John Van Dam could be
    # interpreted as middle name of Van and Surname of Dam. So exclude prefixs
    # from middle names
@@ -676,15 +676,15 @@ my $suffix =
 q{
    suffix:
 
-      # word boundaries are used to stop partial matches from surnames such as 
+      # word boundaries are used to stop partial matches from surnames such as
       # the "VI" in "VINCE"
 
       /Esq(\.|uire)?\b ?/i |
       /Sn?r\.?\b ?/i | # Senior
       /Jn?r\.?\b ?/i | # Junior
-      /PhD\.?\b ?/i  | 
-      /MD\.?\b ?/i   | 
-      /LLB\.?\b ?/i  | 
+      /PhD\.?\b ?/i  |
+      /MD\.?\b ?/i   |
+      /LLB\.?\b ?/i  |
 
 
       /XI{1,3}\b ?/i | # 11th, 12th, 13th
@@ -715,7 +715,7 @@ sub _create
    if ( $name->{joint_names} )
    {
        $grammar .= $rules_joint_names;
-   }    
+   }
    $grammar .= $rules_single_names . $precursors . $titles;
 
     if ( $name->{extended_titles} )
@@ -747,7 +747,7 @@ sub _create
    {
       $grammar .= $given_name_min_4 . $initials_3;
    }
-   
+
    $grammar .= $fixed_length_given_name
              . $middle_name
              . $full_surname
